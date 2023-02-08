@@ -1,11 +1,10 @@
 using Documenter
-using ComputationalHeatTransfer
 
 makedocs(
     prettyurls = true,
     sitename = "ComputationalHeatTransfer",
     format = Documenter.HTML(),
-    modules = [ComputationalHeatTransfer],
+    # modules = [ComputationalHeatTransfer],
     pages = [
         "Home" => "index.md",
         "Basics" => ["manual/subpage.md"
@@ -17,7 +16,7 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo = "<github.com/JuliaIBPM/ComputationalHeatTransfer.jl.git>",
+    repo = "<github.com/liyuxuan48/OscillatingHeatPipe.git>",
     target = "build",
     deps = nothing,
     make = nothing,
