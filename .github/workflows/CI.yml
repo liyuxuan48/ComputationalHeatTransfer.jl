@@ -11,7 +11,7 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
-      - run: julia --project=docs -e 'using Pkg; Pkg.add("Documenter"); Pkg.add("ComputationalHeatTransfer"); Pkg.instantiate()'
+      - run: julia --project=docs -e 'using Pkg; Pkg.add("Documenter"); Pkg.instantiate()'
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
