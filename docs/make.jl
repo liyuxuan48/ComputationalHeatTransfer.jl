@@ -1,6 +1,3 @@
-using Pkg
-Pkg.activate(dirname(pwd()))
-
 using Documenter
 using ComputationalHeatTransfer
 
