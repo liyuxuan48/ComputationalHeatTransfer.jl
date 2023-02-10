@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Properies · ComputationalHeatTransfer</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ComputationalHeatTransfer</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Basics</span><ul><li class="is-active"><a class="tocitem" href>Properies</a><ul class="internal"><li><a class="tocitem" href="#Control-Console"><span>Control Console</span></a></li><li class="toplevel"><a class="tocitem" href="#Properies"><span>Properies</span></a></li><li class="toplevel"><a class="tocitem" href="#Plate-Conduction-Part"><span>Plate Conduction Part</span></a></li><li class="toplevel"><a class="tocitem" href="#Set-up-OHP-channel&#39;s-shape"><span>Set up OHP channel&#39;s shape</span></a></li><li class="toplevel"><a class="tocitem" href="#Create-HeatConduction-system"><span>Create HeatConduction system</span></a></li><li class="toplevel"><a class="tocitem" href="#Create-OHP-inner-channel-system,-initial-state-vector,-and-callback-function"><span>Create OHP inner channel system, initial state vector, and callback function</span></a></li><li><a class="tocitem" href="#Resume"><span>Resume</span></a></li><li><a class="tocitem" href="#Start"><span>Start</span></a></li><li><a class="tocitem" href="#Store-data"><span>Store data</span></a></li><li class="toplevel"><a class="tocitem" href="#dryout-case,-high-htc-for-condenser-adiabatic-side"><span>dryout case, high htc for condenser adiabatic side</span></a></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Basics</a></li><li class="is-active"><a href>Properies</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Properies</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/liyuxuan48/OscillatingHeatPipe/blob/main/docs/src/manual/OHP simulation.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><p>This is an example of a simulation package for conjugate heat transfer of an oscillaitng heat pipe.</p><p>Firstly, let&#39;s import the necessary packages</p><pre><code class="language-julia hljs">using Pkg
+Pkg.activate(dirname(pwd())) # using current environment for development</code></pre><pre><code class="nohighlight hljs">[32m[1m  Activating[22m[39m project at `~/Documents/GitHub/OscillatingHeatPipe`</code></pre><pre><code class="language-julia hljs">using ComputationalHeatTransfer # our main package
+using LaTeXStrings # for latex strings
+using JLD2 # for file input/output
+
+using Plots # for plotting
+gr()  
+</code></pre><pre><code class="nohighlight hljs">┌ Info: Precompiling ComputationalHeatTransfer [5fc296c8-2eb5-40dc-a46d-98a68011a900]
+└ @ Base loading.jl:1662
+
+
+
+
+
+Plots.GRBackend()</code></pre><h2 id="Control-Console"><a class="docs-heading-anchor" href="#Control-Console">Control Console</a><a id="Control-Console-1"></a><a class="docs-heading-anchor-permalink" href="#Control-Console" title="Permalink"></a></h2><p>This block contains the parameters I reckon could be tuned to match the experimental data.  As I am still tuning, they are placed here for convenience.</p><pre><code class="language-julia hljs">OHPtype = &quot;ASETS-II OHP 2 LARGE HEATER&quot;
+power = 40 #watts
+hc = 3000.0 #condenser heat transfer coefficient
+Rn = 3e-6 # nucleation site radius
+δfilm = 2e-5 # initial film thickness
+ad_fac = 1.3 # film thickness factor
+plate_d = 1.5e-3; # plate thickness
+Eratio_plus = 0.15 + 0.5 # η+
+Eratio_minus = 0.15 # η-</code></pre><pre><code class="nohighlight hljs">0.15</code></pre><h1 id="Properies"><a class="docs-heading-anchor" href="#Properies">Properies</a><a id="Properies-1"></a><a class="docs-heading-anchor-permalink" href="#Properies" title="Permalink"></a></h1><pre><code class="language-julia hljs">params</code></pre><pre><code class="nohighlight hljs">HeatConductionParameters(2730.0, 893.0, 193.0, 7.916682048820907e-5, 0.0015)</code></pre><h3 id="Solid-Physical-parameters"><a class="docs-heading-anchor" href="#Solid-Physical-parameters">Solid Physical parameters</a><a id="Solid-Physical-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Solid-Physical-parameters" title="Permalink"></a></h3><p>params is the HeatConductionParameters for the plate material (aluminum).</p><pre><code class="language-julia hljs">ρₛ = 2730; # density
+cₛ  = 8.93e02; # specific heat
+kₛ  = 1.93e02; # heat conductivity
+params = HeatConductionParameters(ρₛ ,cₛ ,kₛ ,thickness=plate_d)</code></pre><pre><code class="nohighlight hljs">HeatConductionParameters(2730.0, 893.0, 193.0, 7.916682048820907e-5, 0.0015)</code></pre><h3 id="Fluid-Physical-parameters"><a class="docs-heading-anchor" href="#Fluid-Physical-parameters">Fluid Physical parameters</a><a id="Fluid-Physical-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Fluid-Physical-parameters" title="Permalink"></a></h3><p>p<em>fluid contains the vapor and liquid properties at a constant reference temperatures. Noted that vapor pressures and vapor density will be functions of temperatures in the simulation, other properties are extracted from p</em>fluid as an approximate value.</p><pre><code class="language-julia hljs">Tref = 291.2 # reference temperature
+fluid_type = &quot;Butane&quot;
+p_fluid = SaturationFluidProperty(fluid_type,Tref);</code></pre><h1 id="Plate-Conduction-Part"><a class="docs-heading-anchor" href="#Plate-Conduction-Part">Plate Conduction Part</a><a id="Plate-Conduction-Part-1"></a><a class="docs-heading-anchor-permalink" href="#Plate-Conduction-Part" title="Permalink"></a></h1><h3 id="Geometry-parameters"><a class="docs-heading-anchor" href="#Geometry-parameters">Geometry parameters</a><a id="Geometry-parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Geometry-parameters" title="Permalink"></a></h3><pre><code class="language-julia hljs">Lx = 0.1524; # plate size x
+Ly = 0.0648; # plate size y
+xlim = (-Lx/2,Lx/2) # plate x limits
+ylim = (-Ly/2,Ly/2) # plate y limits</code></pre><pre><code class="nohighlight hljs">(-0.0324, 0.0324)</code></pre><h3 id="Set-mesh-size-and-maximum-time-step"><a class="docs-heading-anchor" href="#Set-mesh-size-and-maximum-time-step">Set mesh size and maximum time step</a><a id="Set-mesh-size-and-maximum-time-step-1"></a><a class="docs-heading-anchor-permalink" href="#Set-mesh-size-and-maximum-time-step" title="Permalink"></a></h3><pre><code class="language-julia hljs">Δx,Δt_max = setstepsizes(params.α,gridPe=8.0,fourier=0.3) </code></pre><pre><code class="nohighlight hljs">(0.0006333345639056725, 0.001520002953373614)</code></pre><h3 id="Set-up-the-evaporators-and-condensers"><a class="docs-heading-anchor" href="#Set-up-the-evaporators-and-condensers">Set up the evaporators and condensers</a><a id="Set-up-the-evaporators-and-condensers-1"></a><a class="docs-heading-anchor-permalink" href="#Set-up-the-evaporators-and-condensers" title="Permalink"></a></h3><pre><code class="language-julia hljs">Tc = Tref; # condenser temperature
+eparams,cparams = OHPConfiguration(OHPtype,power,Tc,hc,Δx,hc2ratio=1/30);</code></pre><h1 id="Set-up-OHP-channel&#39;s-shape"><a class="docs-heading-anchor" href="#Set-up-OHP-channel&#39;s-shape">Set up OHP channel&#39;s shape</a><a id="Set-up-OHP-channel&#39;s-shape-1"></a><a class="docs-heading-anchor-permalink" href="#Set-up-OHP-channel&#39;s-shape" title="Permalink"></a></h1><pre><code class="language-julia hljs">x, y = construct_ohp_curve(&quot;ASETS&quot;,Δx) # get x and y coordinates for the channel
+ohp = BasicBody(x,y) # build a BasicBody based on x,y
+ohpgeom = ComputationalHeatTransfer.LineSourceParams(ohp);</code></pre><pre><code class="language-julia hljs">plot(ohp,fillalpha=0,linecolor=:blue,xlims=xlim,ylims=ylim,framestyle = :box)</code></pre><p><img src="output_21_0.svg" alt="svg"/></p><h1 id="Create-HeatConduction-system"><a class="docs-heading-anchor" href="#Create-HeatConduction-system">Create HeatConduction system</a><a id="Create-HeatConduction-system-1"></a><a class="docs-heading-anchor-permalink" href="#Create-HeatConduction-system" title="Permalink"></a></h1><pre><code class="language-julia hljs">sys = HeatConduction(params,Δx,xlim,ylim,Δt_max,qline=ohpgeom,qflux=eparams,qmodel=cparams)</code></pre><h1 id="Create-OHP-inner-channel-system,-initial-state-vector,-and-callback-function"><a class="docs-heading-anchor" href="#Create-OHP-inner-channel-system,-initial-state-vector,-and-callback-function">Create OHP inner channel system, initial state vector, and callback function</a><a id="Create-OHP-inner-channel-system,-initial-state-vector,-and-callback-function-1"></a><a class="docs-heading-anchor-permalink" href="#Create-OHP-inner-channel-system,-initial-state-vector,-and-callback-function" title="Permalink"></a></h1><pre><code class="language-julia hljs">sys_tube,u,cbst = initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plus,Eratio_minus,Rn);</code></pre><h3 id="set-time-step"><a class="docs-heading-anchor" href="#set-time-step">set time step</a><a id="set-time-step-1"></a><a class="docs-heading-anchor-permalink" href="#set-time-step" title="Permalink"></a></h3><pre><code class="language-julia hljs">tspan = (0.0, 1.0);
+dt_record = 0.01
+num_data = tspan[2] / dt_record
+
+tstep = 5e-4</code></pre><h3 id="combine-inner-tube-and-plate-together"><a class="docs-heading-anchor" href="#combine-inner-tube-and-plate-together">combine inner tube and plate together</a><a id="combine-inner-tube-and-plate-together-1"></a><a class="docs-heading-anchor-permalink" href="#combine-inner-tube-and-plate-together" title="Permalink"></a></h3><pre><code class="language-julia hljs">u_plate = newstate(sys) .+ Tref # initialize T field
+integrator_plate = init(u_plate,tspan,sys)</code></pre><pre><code class="language-julia hljs">prob = ODEProblem(ODE_innertube, u, tspan, sys_tube)
+integrator_tube = init(prob, RK4(),save_on=false, dt=tstep, callback=cbst)</code></pre><h2 id="Resume"><a class="docs-heading-anchor" href="#Resume">Resume</a><a id="Resume-1"></a><a class="docs-heading-anchor-permalink" href="#Resume" title="Permalink"></a></h2><pre><code class="language-julia hljs"># integrator_plate = integrator_plate_temp;</code></pre><pre><code class="language-julia hljs"># integrator_tube = tube_hist[end];</code></pre><h2 id="Start"><a class="docs-heading-anchor" href="#Start">Start</a><a id="Start-1"></a><a class="docs-heading-anchor-permalink" href="#Start" title="Permalink"></a></h2><pre><code class="language-julia hljs">boil_hist=[]
+plate_T_hist = []
+tube_hist_u  = []
+tube_hist_t = []
+tube_hist_θwall = []</code></pre><pre><code class="language-julia hljs">using Distributed
+using ProgressMeter</code></pre><pre><code class="language-julia hljs">@showprogress for t in tspan[1]:tstep:tspan[2]
+
+    timemarching!(integrator_tube,integrator_plate,tstep)
+    
+    if (mod(integrator_plate.t,dt_record) &lt; 1e-6) || (mod(-integrator_plate.t,dt_record) &lt; 1e-6)
+        push!(plate_T_hist,deepcopy(temperature(integrator_plate))); 
+        push!(tube_hist_θwall,deepcopy(integrator_tube.p.wall.θarray))
+        push!(tube_hist_u,deepcopy(integrator_tube.u));
+        push!(tube_hist_t,deepcopy(integrator_tube.t));
+        integrator_plate_temp = deepcopy(integrator_plate)
+#         println(sys.qline[1].q[1:5])
+    end
+    
+end
+# integrator_plate.t</code></pre><pre><code class="language-julia hljs">boil_hist</code></pre><pre><code class="language-julia hljs">sysfinal = []
+for i = 1:length(tube_hist_u)
+    sysfinaltemp = deepcopy(getcurrentsys(tube_hist_u[i],integrator_tube.p))
+    sysfinaltemp.wall.θarray = tube_hist_θwall[i]
+    push!(sysfinal, sysfinaltemp)
+end</code></pre><pre><code class="language-julia hljs">gr()
+Hₗ = sysfinal[1].liquid.Hₗ
+adjust = 1e-2;
+
+anim = @animate for i=1:length(sysfinal)
+    Htmp = sys_to_Harray(sysfinal[i])
+    Htmp_marker = round.(div.(Htmp,Hₗ-1e-10))
+    plot(ohp,clim=(0,2),fillalpha=0,linewidth=2.0,linecolor=palette([:yellow,  :blue, :red]),
+        line_z=Htmp_marker,xlabel=&quot;x &quot;,ylabel=&quot;y &quot;,border=:none,axis=nothing,bbox_inches=&quot;tight&quot;)
+        annotate!(0.0, 0.028, string(&quot;time = &quot;, round(tube_hist_t[i], digits=2), &quot;[s]&quot;), :black,legend=false)
+    scatter!([-0.066+adjust],[-0.028],color=:yellow);scatter!([-0.03+adjust],[-0.028],color=:red);scatter!([0.02+adjust],[-0.028],color=:blue);
+    annotate!(-0.05+0.002+adjust, -0.028, &quot;dry vapor&quot;, :black)
+    annotate!(-0.01+0.005+adjust, -0.028, &quot;vapor with film&quot;, :black)
+    annotate!(0.03+0.002+adjust, -0.028, &quot;liquid&quot;, :black)
+end
+gif(anim, &quot;slug_fps15.gif&quot;, fps = 10)</code></pre><pre><code class="language-julia hljs">    x = [-2.75inch,-1.4inch,-0.8inch,0.0,0.0,0.8inch,1.4inch,2.75inch]
+    y = [0.0,0.0,0.0,0.0,0.4inch,0.0,0.0,0.0];
+gr()
+Tmax = maximum(plate_T_hist[end]) .- 3.8
+Tmin = minimum(plate_T_hist[1]) .- 3.8
+xlim = integrator_plate.p.grid.xlim[1]
+ylim = integrator_plate.p.grid.xlim[2]
+
+anim = @animate for i = 1:1:length(sysfinal)
+# @gif for i = 1:1:1
+heatmap(plate_T_hist[i].- 3.8,sys.grid,legend=true,color=cgrad(:thermal),
+        xlimit=xlim,ylimit=ylim,clim=(Tmin,Tmax),line_z=0,xlabel=&quot;x [m]&quot;,ylabel=&quot;y [m]&quot;,
+        colorbar_title = &quot;\n T[K]&quot;,right_margin = 5Plots.mm)
+scatter!([x[1],x[4],x[8]],[y[1],y[4],y[8]])
+annotate!(x[1]+0.002, y[1]+0.005, &quot;RTD1&quot;, :white)
+annotate!(x[4]+0.002, y[4]+0.005, &quot;RTD4&quot;, :white)
+annotate!(x[8]-0.001, y[8]+0.005, &quot;RTD8&quot;, :white)
+annotate!(0.05, -0.028, string(&quot;time = &quot;, round(tube_hist_t[i], digits=2), &quot;[s]&quot;), :white,legend=false)
+end
+gif(anim, &quot;temperature_fps15.gif&quot;, fps = 10)</code></pre><h2 id="Store-data"><a class="docs-heading-anchor" href="#Store-data">Store data</a><a id="Store-data-1"></a><a class="docs-heading-anchor-permalink" href="#Store-data" title="Permalink"></a></h2><pre><code class="language-julia hljs">using JLD2</code></pre><pre><code class="language-julia hljs">boil_station_hist = [elem[1] for elem in boil_hist]
+boil_t_hist = [elem[2] for elem in boil_hist]
+boil_data = Array(reshape([boil_station_hist;boil_t_hist], length(boil_t_hist),2));</code></pre><pre><code class="language-julia hljs">save(dirname(dirname(dirname(pwd())))*&quot;/OHPnume/OHP2_40W_large.jld2&quot;,
+    &quot;tube_hist_θwall&quot;, tube_hist_θwall,&quot;tube_hist_u&quot;, tube_hist_u,&quot;tube_hist_t&quot;, tube_hist_t,
+    &quot;integrator_tube&quot;,integrator_tube,&quot;plate_T_hist&quot;, plate_T_hist,
+    &quot;integrator_plate&quot;, integrator_plate, &quot;boil_data&quot;, boil_data,&quot;ohp&quot;,ohp)</code></pre><pre><code class="language-julia hljs">boiltime_stations</code></pre><pre><code class="language-julia hljs">using XLSX
+# namei = &quot;20190604_F_PD_%23005_O002_H001_P010_expA.xlsx&quot;
+# namei = &quot;20190606_F_PD_%23006_O002_H001_P020_expA.xlsx&quot;
+# namei = &quot;20190612_F_PD_%23007_O002_H001_P030_expA.xlsx&quot;
+namei = &quot;20190613_F_PD_%23008_O002_H001_P040_expA.xlsx&quot;
+# namei = &quot;20190613_F_PD_%23004_O001_H001_P040_expA.xlsx&quot;
+# namei = &quot;20190612_F_PD_%23003_O001_H001_P030_expA.xlsx&quot;
+# namei =     &quot;20190604_F_PD_%23001_O001_H001_P010_expA.xlsx&quot;;
+#  namei =    &quot;20190606_F_PD_%23002_O001_H001_P020_expA.xlsx&quot;;
+
+xf = XLSX.readxlsx(dirname(dirname(dirname(pwd())))*&quot;/OHPexp/&quot;*namei)
+    Onum, Hnum, power_exp = getconfig(namei)
+    RTD,RTDt = getRTD(xf,Onum);</code></pre><pre><code class="language-julia hljs">    x = [-2.9inch,-1.4inch,-0.8inch,0.0,0.0,0.8inch,1.4inch,2.9inch]
+    y = [0.0,0.0,0.0,0.0,0.4inch,0.0,0.0,0.0];
+    X =  VectorData(x,y);
+    H = Regularize(X,cellsize(sys),I0=origin(sys.grid))
+    g = ScalarData(X);
+    ghist = getghist(g,H,plate_T_hist);
+    thist = tube_hist_t;</code></pre><pre><code class="language-julia hljs">Tᵥ = Tref</code></pre><h1 id="dryout-case,-high-htc-for-condenser-adiabatic-side"><a class="docs-heading-anchor" href="#dryout-case,-high-htc-for-condenser-adiabatic-side">dryout case, high htc for condenser adiabatic side</a><a id="dryout-case,-high-htc-for-condenser-adiabatic-side-1"></a><a class="docs-heading-anchor-permalink" href="#dryout-case,-high-htc-for-condenser-adiabatic-side" title="Permalink"></a></h1><pre><code class="language-julia hljs">pyplot()
+i = 1 #RTD number
+
+p1 = plot(thist,ghist[i] .-Tᵥ, color=:red, label=string(&quot;RTD&quot;, i,&quot; simulation&quot;),linewidth=2,legend = :topleft)
+scatter!(RTDt .- RTDt[1],RTD[:,i] .- RTD[1,i], color=:red, label=string(&quot;RTD&quot;, i,&quot; experiment&quot;))
+
+i = 4 #RTD number
+
+p1 = plot!(thist,ghist[i] .-Tᵥ, color=:green, label=string(&quot;RTD&quot;, i,&quot; simulation&quot;),linewidth=2,legend = :topleft)
+scatter!(RTDt .- RTDt[1],RTD[:,i] .- RTD[1,i], color=:green, label=string(&quot;RTD&quot;, i,&quot; experiment&quot;))
+
+i = 8 #RTD number
+plot!(thist,ghist[i] .-Tᵥ,color=:orange,label=string(&quot;RTD&quot;, i,&quot; simulation&quot;),linewidth=2)
+scatter!(RTDt .- RTDt[1],RTD[:,i] .- RTD[1,i], color=:orange, label=string(&quot;RTD&quot;, i,&quot; experiment&quot;),
+    xlabel=&quot;time [s]&quot;,ylabel=&quot;T-T₀ [K]&quot;,xlim=(0,1),ylim=(0,3),title=(&quot;temperature curve: OHP2 large heater&quot;))
+
+savefig(p1,&quot;temp_curve.pdf&quot;)</code></pre><pre><code class="language-julia hljs">M1 = sum.(getMvapor.(sysfinal));
+M2 = sum.(sum.(getMfilm.(sysfinal)));
+M3 = sum.(getMliquid.(sysfinal));
+Mtotal = M1 .+ M2 .+ M3;
+M0 = Mtotal[1]
+plot(Mtotal/M0,ylim=(0.999,1.001))</code></pre><pre><code class="language-julia hljs">M2</code></pre><pre><code class="language-julia hljs">M3</code></pre><pre><code class="language-julia hljs">θ_interp_walltoliquid
+    θ_interp_liquidtowall
+    H_interp_liquidtowall
+    P_interp_liquidtowall</code></pre><pre><code class="language-julia hljs">sysfinal[3].mapping.P_interp_liquidtowall[1.0]</code></pre><pre><code class="language-julia hljs">phist = []
+for systemp in sysfinal
+    ptemp = systemp.mapping.P_interp_liquidtowall[3.0]
+    push!(phist, ptemp)
+end</code></pre><pre><code class="language-julia hljs">plot(phist)</code></pre><pre><code class="language-julia hljs"></code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Friday 10 February 2023 19:32">Friday 10 February 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
