@@ -1,3 +1,5 @@
+# ASETS-II
+
 This is an example of a simulation package for conjugate heat transfer of an oscillaitng heat pipe.
 
 Firstly, let's import the necessary packages
@@ -7,9 +9,6 @@ Firstly, let's import the necessary packages
 using Pkg
 Pkg.activate(dirname(pwd())) # using current environment for development
 ```
-
-    [32m[1m  Activating[22m[39m project at `~/Documents/GitHub/OscillatingHeatPipe`
-
 
 
 ```julia
@@ -21,17 +20,6 @@ using Plots # for plotting
 gr()  
 
 ```
-
-    ┌ Info: Precompiling ComputationalHeatTransfer [5fc296c8-2eb5-40dc-a46d-98a68011a900]
-    └ @ Base loading.jl:1662
-
-
-
-
-
-    Plots.GRBackend()
-
-
 
 ## Control Console
 
@@ -51,26 +39,12 @@ Eratio_plus = 0.15 + 0.5 # η+
 Eratio_minus = 0.15 # η-
 ```
 
-
-
-
-    0.15
-
-
-
 # Properies
 
 
 ```julia
 params
 ```
-
-
-
-
-    HeatConductionParameters(2730.0, 893.0, 193.0, 7.916682048820907e-5, 0.0015)
-
-
 
 ### Solid Physical parameters
 
@@ -83,13 +57,6 @@ cₛ  = 8.93e02; # specific heat
 kₛ  = 1.93e02; # heat conductivity
 params = HeatConductionParameters(ρₛ ,cₛ ,kₛ ,thickness=plate_d)
 ```
-
-
-
-
-    HeatConductionParameters(2730.0, 893.0, 193.0, 7.916682048820907e-5, 0.0015)
-
-
 
 ### Fluid Physical parameters
 
@@ -114,26 +81,12 @@ xlim = (-Lx/2,Lx/2) # plate x limits
 ylim = (-Ly/2,Ly/2) # plate y limits
 ```
 
-
-
-
-    (-0.0324, 0.0324)
-
-
-
 ### Set mesh size and maximum time step
 
 
 ```julia
 Δx,Δt_max = setstepsizes(params.α,gridPe=8.0,fourier=0.3) 
 ```
-
-
-
-
-    (0.0006333345639056725, 0.001520002953373614)
-
-
 
 ### Set up the evaporators and condensers
 
@@ -156,15 +109,6 @@ ohpgeom = ComputationalHeatTransfer.LineSourceParams(ohp);
 ```julia
 plot(ohp,fillalpha=0,linecolor=:blue,xlims=xlim,ylims=ylim,framestyle = :box)
 ```
-
-
-
-
-    
-![svg](output_21_0.svg)
-    
-
-
 
 # Create HeatConduction system
 
@@ -372,7 +316,7 @@ xf = XLSX.readxlsx(dirname(dirname(dirname(pwd())))*"/OHPexp/"*namei)
 Tᵥ = Tref
 ```
 
-# dryout case, high htc for condenser adiabatic side
+# post processing
 
 
 ```julia
