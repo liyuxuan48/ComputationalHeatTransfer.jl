@@ -118,8 +118,8 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plu
 
         boil_type = "wall T"
         L_newbubble = 4tube_d
-        boil_interval = L_to_boiltime(L_newbubble,Rn,fluid_type,vapors::Vapor,tube::Tube)
-        # boil_interval = 4.0
+        # boil_interval = L_to_boiltime(L_newbubble,Rn,fluid_type,vapors::Vapor,tube::Tube)
+        boil_interval = 2.0
         Xwallarray,θwallarray = constructXarrays(sys.qline[1].arccoord,L,Tref);
         θwallarray .= Tref
 

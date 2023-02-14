@@ -1,7 +1,6 @@
 using Documenter
 
 makedocs(
-    prettyurls = true,
     sitename = "ComputationalHeatTransfer",
     format = Documenter.HTML(),
     # modules = [ComputationalHeatTransfer],

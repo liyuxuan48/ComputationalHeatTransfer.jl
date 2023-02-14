@@ -153,3 +153,17 @@ mutable struct PHPSystem_nomapping
     vapor   ::Vapor
     wall    ::Wall
 end
+
+function Base.show(io::IO, sys::PHPSystem)
+    # mtype = (MT == StaticPoints) ? "static" : "moving"
+    # sdmsg = (N == 0) ? "Unbounded" : ((SD == ExternalProblem) ? "External problem" : ((SD == InternalProblem) ? "Internal problem" : "External/internal"))
+    # println(io, "$sdmsg Heat conduction system on a grid of size $NX x $NY and $N $mtype immersed points")
+    N = sys.tube.N
+    angle = sys.tube.angle
+    fluidtype = sys.tube.fluid_type
+    println(io, "$N point OHP system filled with $fluidtype")
+    # if N > 0
+    #   bdmsg = (length(sys.bodies) == 1) ? "1 body" : "$(length(sys.bodies)) bodies"
+    #   println(io, "   $bdmsg")
+    # end
+end
