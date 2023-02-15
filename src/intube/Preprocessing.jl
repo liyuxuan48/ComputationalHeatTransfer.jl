@@ -105,8 +105,8 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plu
         δend = 0*zeros(length(X0)) .+ δfilm ;
 
         Lvaporplug = XptoLvaporplug(X0,L,tube.closedornot)
-        Lfilm_start = 0.25 .* Lvaporplug
-        Lfilm_end = 0.25 .* Lvaporplug
+        Lfilm_start = 0.01 .* Lvaporplug
+        Lfilm_end = 0.01 .* Lvaporplug
         δmin = 2e-6
         vapors=Vapor(Hᵥ,p_fluid.kₗ,δmin,Eratio_plus,Eratio_minus,P,δfilm_deposit,δstart,δend,Lfilm_start,Lfilm_end);
 
@@ -119,7 +119,7 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plu
         boil_type = "wall T"
         L_newbubble = 4tube_d
         # boil_interval = L_to_boiltime(L_newbubble,Rn,fluid_type,vapors::Vapor,tube::Tube)
-        boil_interval = 2.0
+        boil_interval = 1.0
         Xwallarray,θwallarray = constructXarrays(sys.qline[1].arccoord,L,Tref);
         θwallarray .= Tref
 
