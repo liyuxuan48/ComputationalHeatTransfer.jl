@@ -68,6 +68,7 @@ end
 """
 
 mutable struct Vapor
+    ad_fac::Float64
     Hᵥ::Float64
     k::Float64
     δmin::Float64

@@ -24,6 +24,9 @@ PtoHfg = LinearInterpolation(Prange, Hfgrange);
 
 
 struct SaturationFluidProperty
+    fluid_type::String
+    Tref::Float64
+
     Cpₗ::Float64
     ρₗ::Float64
     μₗ::Float64
@@ -50,7 +53,7 @@ struct SaturationFluidProperty
     hₗᵥ::Float64
 end
 
-function SaturationFluidProperty(Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,μᵥ,hᵥ,kᵥ,Prᵥ,σ,P,R,M)
+function SaturationFluidProperty(fluid_type,Tᵥ,Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,μᵥ,hᵥ,kᵥ,Prᵥ,σ,P,R,M)
 
     Rkg = R/M
     αₗ = kₗ/ρₗ/Cpₗ
@@ -58,7 +61,7 @@ function SaturationFluidProperty(Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,�
     νᵥ = μᵥ/ρᵥ;
     hₗᵥ = hᵥ-hₗ;
 
-    SaturationFluidProperty(Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,μᵥ,hᵥ,kᵥ,Prᵥ,σ,P,R,M,Rkg,αₗ,νₗ,νᵥ,hₗᵥ)
+    SaturationFluidProperty(fluid_type,Tᵥ,Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,μᵥ,hᵥ,kᵥ,Prᵥ,σ,P,R,M,Rkg,αₗ,νₗ,νᵥ,hₗᵥ)
 end
 
 function SaturationFluidProperty(fluid_type::String,Tᵥ)
@@ -81,5 +84,12 @@ function SaturationFluidProperty(fluid_type::String,Tᵥ)
     R = CoolProp.PropsSI("GAS_CONSTANT","T",Tᵥ,"Q",1.0,fluid_type)
     M = CoolProp.PropsSI("M","T",Tᵥ,"Q",1.0,fluid_type)
 
-    SaturationFluidProperty(Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,μᵥ,hᵥ,kᵥ,Prᵥ,σ,P,R,M)
+    SaturationFluidProperty(fluid_type,Tᵥ,Cpₗ,ρₗ,μₗ,hₗ,kₗ,Prₗ,Cpᵥ,ρᵥ,μᵥ,hᵥ,kᵥ,Prᵥ,σ,P,R,M)
+end
+
+function Base.show(io::IO, p::SaturationFluidProperty)
+    fluidtype = p.fluid_type
+    Tref = p.Tref
+    # typestring = typeof(p)
+    println(io, "Saturation properties for $fluidtype at constant temperature $Tref [K]")
 end

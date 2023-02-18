@@ -1,10 +1,10 @@
 using Statistics
+import Main
 
 export dMdtdynamicsmodel,dynamicsmodel_steadyfilm,wallmodel,liquidmodel,dynamicsmodel,sys_to_heatflux,sys_to_Harray,integrator_to_heatflux,integrator_to_Harray
 
 
 function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
-
 
     du = zero(deepcopy(u))
 
@@ -31,7 +31,7 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
     Vavg = mean(abs.(V))
     Ca = getCa.(μₗ,σ,Vavg)
     
-    ad_fac = Main.ad_fac
+    ad_fac = sys.vapor.ad_fac
     δdeposit = Catoδ(d,Ca,adjust_factor=ad_fac)
     Adeposit = getAdeposit(sys,δdeposit)
     Adeposit_left = [elem[1] for elem in Adeposit]
@@ -46,7 +46,7 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
     height = getheight(Xp,sys.tube.L2D,sys.tube.angle)
     Xpvapor = getXpvapor(Xp,sys.tube.L,sys.tube.closedornot)
 
-    ρₗ = p.liquid.ρ
+    ρₗ = sys.liquid.ρ
 # get differential equation factors
     lhs = ρₗ*Ac .* Lliquidslug
     rhs_press = Ac ./ lhs
@@ -57,12 +57,12 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
     rhs_dXdt = peri .* Lliquidslug .* dXdt_to_stress ./ lhs
     rhs_g = Ac*ρₗ*g*cos(angle) ./ lhs
 
-    if p.tube.closedornot == false
+    if sys.tube.closedornot == false
         println("open loop not supported!")
          return "open loop not supported!"
         end
 
-    if p.tube.closedornot == true
+    if sys.tube.closedornot == true
 
         numofvaporbubble = numofliquidslug
 
@@ -391,7 +391,7 @@ function dMdtdynamicsmodel_positive(Xpvapor::Array{Tuple{Float64,Float64},1},sys
 end
 
 function liquidmodel(p::PHPSystem)
-    tstep = Main.tstep
+    global tstep
     sys = deepcopy(p)
     θarrays = sys.liquid.θarrays
     # nondihv_tonondihl = 0.0046206704347650325 # temperary variable to fix different nondimensionlaization
@@ -399,7 +399,7 @@ function liquidmodel(p::PHPSystem)
     du = zero.(deepcopy(θarrays))
 
     # γ = sys.vapor.γ
-    Ac = p.tube.Ac
+    Ac = sys.tube.Ac
 
     Hₗ = sys.liquid.Hₗ
     peri = sys.tube.peri
@@ -491,7 +491,7 @@ function sys_to_heatflux(p::PHPSystem)
     # δ = sys.vapor.δ
     # Hvapor = k ./ δ
 
-    peri = p.tube.peri
+    peri = sys.tube.peri
 
     # dx = sys.wall.Xarray[2]-sys.wall.Xarray[1]
 

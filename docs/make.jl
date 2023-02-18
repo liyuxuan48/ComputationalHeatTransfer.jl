@@ -5,9 +5,7 @@ makedocs(
     format = Documenter.HTML(),
     # modules = [ComputationalHeatTransfer],
     pages = [
-        "Home" => "index.md",
-        "Example" => ["manual/OHP simulation.md"
-                     ]
+        "Home" => "OHP simulation.md"
     ]
 )
 

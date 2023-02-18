@@ -2,13 +2,13 @@ export ODE_innertube,ODE_steadyfilm,timemarching!
 
 function ODE_innertube(u,p,t)
 
-    # println(dt)
+    sys_init = p
 
     index_dynamics_end = findfirst(x->abs(x+1e10) <= 10^(-1), u)
 
     # println(u[1:100])
 
-    newsys = getcurrentsys(u,p)
+    newsys = getcurrentsys(u,sys_init)
 
     dynamicsdu = dynamicsmodel(u[1:index_dynamics_end-1],newsys)
 
