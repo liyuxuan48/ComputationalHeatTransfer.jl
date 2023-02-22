@@ -1,4 +1,4 @@
-export randomXp,L_to_boiltime,initialize_ohpsys
+export SimulationResult,randomXp,L_to_boiltime,initialize_ohpsys,store!
 
 function randomXp(tube::Tube,numofslugs=30,chargeratio=0.46,σ_charge=0.1)
 
@@ -133,16 +133,56 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plu
 
     sys0 = PHPSystem(tube,liquids,vapors,wall,mapping);
 
+    # Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
+    # M = PtoD(P) .* Lvaporplug .* Ac
+
+    # u=[XMδLtovec(X0,dXdt0,M,δstart,δend,Lfilm_start,Lfilm_end); liquidθtovec(sys0.liquid.θarrays)];
+    sys0
+end
+
+function newstate(sys0::PHPSystem)
+    Ac = sys0.tube.Ac
+
+    X0 = sys0.liquid.Xp
+    dXdt0 = sys0.liquid.dXdt
+
+    δstart = sys0.vapor.δstart
+    δend = sys0.vapor.δend
+    Lfilm_start = sys0.vapor.Lfilm_start
+    Lfilm_end = sys0.vapor.Lfilm_end
+    P = sys0.vapor.P
+    
+
     Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
     M = PtoD(P) .* Lvaporplug .* Ac
 
     u=[XMδLtovec(X0,dXdt0,M,δstart,δend,Lfilm_start,Lfilm_end); liquidθtovec(sys0.liquid.θarrays)];
+end
 
-    cb_boiling =  DiscreteCallback(boiling_condition,boiling_affect!)
-    cb_vapormerging =  DiscreteCallback(merging_condition,merging_affect!)
-    cb_liquidmerging = DiscreteCallback(vaporMergingCondition,vaporMergingAffect!)
-    cb_fixdx =  DiscreteCallback(fixdx_condition,fixdx_affect!)
-    cbst = CallbackSet(cb_fixdx,cb_boiling,cb_vapormerging,cb_liquidmerging);
+mutable struct SimulationResult
+    tube_hist_t      ::Vector{Any}
+    tube_hist_u      ::Vector{Any}
+    tube_hist_θwall  ::Vector{Any}
+    boil_hist        ::Vector{Any}
+    plate_T_hist     ::Vector{Any}
+end
+
+function SimulationResult()
+    
+    boil_hist=[]
+    plate_T_hist = []
+    tube_hist_u  = []
+    tube_hist_t = []
+    tube_hist_θwall = []
+    
+    return SimulationResult(tube_hist_t,tube_hist_u,tube_hist_θwall,boil_hist,plate_T_hist)
+end
+
+function store!(sr,integrator_tube,integrator_plate)
         
-    sys0,u,cbst
+#         sr.boil_hist = deepcopy(boil_hist);
+        push!(sr.plate_T_hist,deepcopy(temperature(integrator_plate)));
+        push!(sr.tube_hist_θwall,deepcopy(integrator_tube.p.wall.θarray))
+        push!(sr.tube_hist_u,deepcopy(integrator_tube.u));
+        push!(sr.tube_hist_t,deepcopy(integrator_tube.t));
 end

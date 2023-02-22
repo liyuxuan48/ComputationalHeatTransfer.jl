@@ -1,3 +1,5 @@
+import ConstrainedSystems: init, solve
+
 export ODE_innertube,ODE_steadyfilm,timemarching!
 
 function ODE_innertube(u,p,t)
@@ -53,4 +55,16 @@ function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
     integrator_plate.t += tstep
     
     integrator_tube,integrator_plate
+end
+
+function init(u_tube::Vector{Float64},tspan::Tuple{Any, Any},sys_tube::PHPSystem,kwargs...)
+    
+    cb_boiling =  DiscreteCallback(boiling_condition,boiling_affect!)
+    cb_vapormerging =  DiscreteCallback(merging_condition,merging_affect!)
+    cb_liquidmerging = DiscreteCallback(vaporMergingCondition,vaporMergingAffect!)
+    cb_fixdx =  DiscreteCallback(fixdx_condition,fixdx_affect!)
+    cbst = CallbackSet(cb_fixdx,cb_boiling,cb_vapormerging,cb_liquidmerging);
+
+    prob = ODEProblem(ODE_innertube, u_tube, tspan, sys_tube,kwargs...) # construct integrator_tube problem
+    return init(prob, alg=RK4(),save_on=false, callback=cbst,maxiters=1e10,kwargs...)
 end

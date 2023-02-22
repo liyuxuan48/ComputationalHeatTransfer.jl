@@ -1,5 +1,4 @@
 using Statistics
-import Main
 
 export dMdtdynamicsmodel,dynamicsmodel_steadyfilm,wallmodel,liquidmodel,dynamicsmodel,sys_to_heatflux,sys_to_Harray,integrator_to_heatflux,integrator_to_Harray
 
@@ -391,7 +390,7 @@ function dMdtdynamicsmodel_positive(Xpvapor::Array{Tuple{Float64,Float64},1},sys
 end
 
 function liquidmodel(p::PHPSystem)
-    global tstep
+    tstep = Main.tstep
     sys = deepcopy(p)
     θarrays = sys.liquid.θarrays
     # nondihv_tonondihl = 0.0046206704347650325 # temperary variable to fix different nondimensionlaization
