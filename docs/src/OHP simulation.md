@@ -182,7 +182,3 @@ end
 save_path = dirname(dirname(dirname(pwd())))*"/OHPnume/OHP2_40W_large.jld2"
 save(save_path,"SimulationResult",sr,"integrator_tube",integrator_tube,"integrator_plate",integrator_plate,"ohp",ohp)
 ```
-
----
-
-*This notebook was generated using [Literate.jl](https://github.com/fredrikekre/Literate.jl).*
