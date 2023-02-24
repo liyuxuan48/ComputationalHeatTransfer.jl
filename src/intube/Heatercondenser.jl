@@ -3,23 +3,23 @@ export OHPConfiguration
 function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,Δx::Real;hc2ratio=1/30)
 
     if configure_type == "ASETS-II OHP 1 LARGE HEATER"
-        total_heater_area = 2.0inch*2.0inch;
+        total_heater_area = 2.0inches*2.0inches;
         qe = power/total_heater_area;
 
-        eb1 = Rectangle(0.5inch,1.0inch,1.5*Δx)
-        Tfe = RigidTransform((0.7inch,-0.0),0.0)
+        eb1 = Rectangle(0.5inches,1.0inches,1.5*Δx)
+        Tfe = RigidTransform((0.7inches,-0.0),0.0)
         Tfe(eb1)
 
-        eb2 = Rectangle(0.5inch,1.0inch,1.5*Δx)
-        Tfe = RigidTransform((-0.7inch,-0.0),0.0)
+        eb2 = Rectangle(0.5inches,1.0inches,1.5*Δx)
+        Tfe = RigidTransform((-0.7inches,-0.0),0.0)
         Tfe(eb2)
 
-        cb1 = Rectangle(0.55inch,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
-        Tfc = RigidTransform((-2.5inch,-0.0),0.0)
+        cb1 = Rectangle(0.55inches,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
+        Tfc = RigidTransform((-2.5inches,-0.0),0.0)
         Tfc(cb1)
 
-        cb2 = Rectangle(0.55inch,0.0648/2 ,1.5*Δx)
-        Tfc = RigidTransform((2.5inch,-0.0),0.0)
+        cb2 = Rectangle(0.55inches,0.0648/2 ,1.5*Δx)
+        Tfc = RigidTransform((2.5inches,-0.0),0.0)
         Tfc(cb2)
 
         eparams1 = PrescribedHeatFluxRegion(qe,eb1);
@@ -31,23 +31,23 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,�
     end
 
     if (configure_type == "ASETS-II OHP 2 LARGE HEATER") || (configure_type == "ASETS-II OHP 3 LARGE HEATER")
-        total_heater_area = 2.0inch*2.0inch;
+        total_heater_area = 2.0inches*2.0inches;
         qe = power/total_heater_area;
 
-        eb1 = Rectangle(0.5inch,1.0inch,1.5*Δx)
-        Tfe = RigidTransform((0.7inch,-0.0),0.0)
+        eb1 = Rectangle(0.5inches,1.0inches,1.5*Δx)
+        Tfe = RigidTransform((0.7inches,-0.0),0.0)
         Tfe(eb1)
 
-        eb2 = Rectangle(0.5inch,1.0inch,1.5*Δx)
-        Tfe = RigidTransform((-0.7inch,-0.0),0.0)
+        eb2 = Rectangle(0.5inches,1.0inches,1.5*Δx)
+        Tfe = RigidTransform((-0.7inches,-0.0),0.0)
         Tfe(eb2)
 
-        cb1 = Rectangle(2.5inch,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
-        Tfc = RigidTransform((-0.5inch,-0.0),0.0)
+        cb1 = Rectangle(2.5inches,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
+        Tfc = RigidTransform((-0.5inches,-0.0),0.0)
         Tfc(cb1)
 
-        cb2 = Rectangle(0.55inch,0.0648/2,1.5*Δx)
-        Tfc = RigidTransform((2.5inch,-0.0),0.0)
+        cb2 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
+        Tfc = RigidTransform((2.5inches,-0.0),0.0)
         Tfc(cb2)
 
         eparams1 = PrescribedHeatFluxRegion(qe,eb1);
@@ -59,19 +59,19 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,�
     end
 
     if configure_type == "ASETS-II OHP 1 SMALL HEATER"
-        total_heater_area = 0.5inch*0.5inch;
+        total_heater_area = 0.5inches*0.5inches;
         qe = power/total_heater_area;
 
-        eb1 = Rectangle(0.25inch,0.25inch,1.5*Δx)
-        Tfe = RigidTransform((0.0inch,-0.0),0.0)
+        eb1 = Rectangle(0.25inches,0.25inches,1.5*Δx)
+        Tfe = RigidTransform((0.0inches,-0.0),0.0)
         Tfe(eb1)
 
-        cb1 = Rectangle(0.55inch,0.0648/2,1.5*Δx)
-        Tfc = RigidTransform((-2.5inch,-0.0),0.0)
+        cb1 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
+        Tfc = RigidTransform((-2.5inches,-0.0),0.0)
         Tfc(cb1)
 
-        cb2 = Rectangle(0.55inch,0.0648/2,1.5*Δx)
-        Tfc = RigidTransform((2.5inch,-0.0),0.0)
+        cb2 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
+        Tfc = RigidTransform((2.5inches,-0.0),0.0)
         Tfc(cb2)
 
         eparams1 = PrescribedHeatFluxRegion(qe,eb1);
@@ -82,19 +82,19 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,�
     end
 
     if (configure_type == "ASETS-II OHP 2 SMALL HEATER") || (configure_type == "ASETS-II OHP 3 SMALL HEATER")
-        total_heater_area = 0.5inch*0.5inch;
+        total_heater_area = 0.5inches*0.5inches;
         qe = power/total_heater_area;
 
-        eb1 = Rectangle(0.25inch,0.25inch,1.5*Δx)
-        Tfe = RigidTransform((0.0inch,-0.0),0.0)
+        eb1 = Rectangle(0.25inches,0.25inches,1.5*Δx)
+        Tfe = RigidTransform((0.0inches,-0.0),0.0)
         Tfe(eb1)
 
-        cb1 = Rectangle(2.5inch,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
-        Tfc = RigidTransform((-0.5inch,-0.0),0.0)
+        cb1 = Rectangle(2.5inches,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
+        Tfc = RigidTransform((-0.5inches,-0.0),0.0)
         Tfc(cb1)
 
-        cb2 = Rectangle(0.55inch,0.0648/2,1.5*Δx)
-        Tfc = RigidTransform((2.5inch,-0.0),0.0)
+        cb2 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
+        Tfc = RigidTransform((2.5inches,-0.0),0.0)
         Tfc(cb2)
 
         eparams1 = PrescribedHeatFluxRegion(qe,eb1);
