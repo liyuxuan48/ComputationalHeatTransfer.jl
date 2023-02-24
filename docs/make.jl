@@ -6,8 +6,8 @@ makedocs(
     # modules = [ComputationalHeatTransfer],
     pages = [
         "Home" => "index.md",
-        "Simulation" => "OHP simulation.md",
-        "Post-Processing" => "PostProcessing-oneresult.md"
+        # "Simulation" => "OHP simulation.md",
+        # "Post-Processing" => "PostProcessing-oneresult.md"
     ]
 )
 
