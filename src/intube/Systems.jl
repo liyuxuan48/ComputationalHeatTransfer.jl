@@ -94,6 +94,7 @@ end
 mutable struct Wall
     fluid_type::String
     boil_type::String
+    power::Float64
     boil_interval::Float64
     Rn::Float64
     L_newbubble::Float64

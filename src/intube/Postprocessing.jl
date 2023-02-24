@@ -1,6 +1,8 @@
-export getcurrentsys,getRTD,getconfig,getghist,getthist,getgt,getsysfinal,getwetness,getV,getδ,getHtmp_marker
+export getcurrentsys,getRTD,getconfig,getghist,getthist,getgt,getsysfinal,getwetness,getV,getδ,getHtmp_marker,
+translateOHPdata,getTcurve,oneDtwoDtransform,get_boil_matrix
 
 using Statistics
+using SparseArrays 
 
 """
     give a new u and an old system, return a new system sysnew
@@ -217,4 +219,77 @@ end
 
 function getHtmp_marker(Htmp,Hₗ,Hᵥ)
     Htmp_marker = (Htmp < Hₗ + 1e-10) && (Htmp > Hₗ - 1e-10) ? 1.0 : (Htmp > Hᵥ + 1e-10) ? 2.0 : 0.0
+end
+
+function translateOHPdata(OHPdata::Dict{String, Any})
+    ohp = OHPdata["ohp"]
+    sr  = OHPdata["SimulationResult"]
+    @unpack boil_hist,tube_hist_t,tube_hist_θwall,tube_hist_u,plate_T_hist = sr;
+    integrator_tube = OHPdata["integrator_tube"]
+    integrator_plate = OHPdata["integrator_plate"];
+    sysfinal = getsysfinal(tube_hist_u,tube_hist_θwall,integrator_tube);
+    sys = integrator_plate.p
+    plate_T_hist = sr.plate_T_hist
+    
+    sysfinal,ohp,integrator_plate,integrator_tube,boil_hist,plate_T_hist
+end
+
+function getTcurve(x,y,OHPdata)
+    
+    sys = OHPdata["integrator_plate"].p
+    plate_T_hist = OHPdata["SimulationResult"].plate_T_hist
+    X =  VectorData(x,y);
+    H = Regularize(X,cellsize(sys),I0=origin(sys.grid))
+    g = ScalarData(X);
+    ghist = getghist(g,H,plate_T_hist);
+    thist = OHPdata["SimulationResult"].tube_hist_t; 
+    
+    ghist,thist
+end
+
+function oneDtwoDtransform(ξ::Vector,OHPdata::Dict{String, Any})
+    plate_sys = OHPdata["integrator_plate"].p
+    ql = plate_sys.qline[1]
+    interp_linear_x = LinearInterpolation(ql.arccoord, ql.body.x,extrapolation_bc = Line());
+    interp_linear_y = LinearInterpolation(ql.arccoord, ql.body.y,extrapolation_bc = Line());
+
+    x2D = interp_linear_x[ξ]
+    y2D = interp_linear_y[ξ];
+    
+    x2D,y2D
+end
+
+function get_boil_matrix(OHPdata;boil_dt = 0.1)
+    
+    boil_hist = OHPdata["SimulationResult"].boil_hist;
+    
+    boil_station_hist = [elem[1] for elem in boil_hist]
+    boil_t_hist = [elem[2] for elem in boil_hist]
+    boil_data = Array(reshape([boil_station_hist;boil_t_hist], length(boil_t_hist),2));
+    
+    Xstations = OHPdata["integrator_tube"].p.wall.Xstations;
+    tend = boil_data[end,2]
+#     boil_dt = 0.1;
+    
+    boil_matrix=spzeros(size(Xstations,1),Int64(round(tend/boil_dt)));
+    for tnum = 1:size(boil_matrix,2)
+         boil_index = findall(x->Int64(round(x/boil_dt))==tnum,boil_data[:,2])
+
+        if length(boil_index) != 0
+            i_station_temp = Int64.(boil_data[boil_index,1])
+            for i in i_station_temp
+                boil_matrix[i,tnum] = 1
+            end
+        end
+    end
+    
+    boil_num_t = sum(boil_matrix, dims=1)'
+    boil_num_x = sum(boil_matrix, dims=2);
+    t_boil = boil_dt:boil_dt:boil_dt*length(boil_num_t)
+    
+    integrator_tube = OHPdata["integrator_tube"]
+    ξ = integrator_tube.p.wall.Xstations
+    x2D_boil,y2D_boil = oneDtwoDtransform(ξ::Vector,OHPdata::Dict{String, Any})
+    
+    boil_data,boil_num_x,boil_num_t,t_boil,x2D_boil,y2D_boil
 end

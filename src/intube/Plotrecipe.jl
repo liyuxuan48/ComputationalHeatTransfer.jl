@@ -10,9 +10,14 @@ using RecipesBase
 
             x1,y1 = stackXpTemp(val)
 
+            popfirst!(x1)
+            popfirst!(y1)
+
             legend := false
             color_palette  := :seaborn_dark
             title := "OHP temperatures"
+            xlabel := "ξ [m]"
+            ylabel := "T [K]"
             # y1 = y1 .* T0
 
             return x1,y1

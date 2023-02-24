@@ -1,6 +1,6 @@
-export inch,gravity
+export inches,gravity,expfileDict
 
-const inch = 2.54e-2; 
+const inches = 2.54e-2; 
 const gravity = 9.8;
 
 
@@ -20,3 +20,22 @@ include("intube/callback/boiling.jl")
 include("intube/callback/vapormerging.jl")
 include("intube/callback/liquidmerging.jl")
 include("intube/callback/fixdx.jl")
+
+expfileDict = Dict([
+    ("O001_H002_P010","20190607_F_PD_%23013_O001_H002_P010_expA.xlsx"),
+    ("O001_H002_P020","20190608_F_PD_%23014_O001_H002_P020_expA.xlsx"),
+    ("O001_H002_P030","20190614_F_PD_%23015_O001_H002_P030_expA.xlsx"),
+    ("O001_H002_P040","20190617_F_PD_%23016_O001_H002_P040_expA.xlsx"),
+    ("O001_H001_P010","20190604_F_PD_%23001_O001_H001_P010_expA.xlsx"),
+    ("O001_H001_P020","20190606_F_PD_%23002_O001_H001_P020_expA.xlsx"),
+    ("O001_H001_P030","20190612_F_PD_%23003_O001_H001_P030_expA.xlsx"),
+    ("O001_H001_P040","20190613_F_PD_%23004_O001_H001_P040_expA.xlsx"),
+    ("O002_H002_P010","20190607_F_PD_%23017_O002_H002_P010_expA.xlsx"),
+    ("O002_H002_P020","20190608_F_PD_%23018_O002_H002_P020_expA.xlsx"),
+    ("O002_H002_P030","20190614_F_PD_%23019_O002_H002_P030_expA.xlsx"),
+    ("O002_H002_P040","20190617_F_PD_%23020_O002_H002_P040_expA.xlsx"),
+    ("O002_H001_P010","20190604_F_PD_%23005_O002_H001_P010_expA.xlsx"),
+    ("O002_H001_P020","20190606_F_PD_%23006_O002_H001_P020_expA.xlsx"),
+    ("O002_H001_P030","20190612_F_PD_%23007_O002_H001_P030_expA.xlsx"),
+    ("O002_H001_P040","20190613_F_PD_%23008_O002_H001_P040_expA.xlsx")
+        ]);

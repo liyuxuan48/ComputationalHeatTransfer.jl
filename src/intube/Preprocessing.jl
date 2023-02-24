@@ -66,7 +66,7 @@ function L_to_boiltime(L_new_bubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     return interp_Rtot(L_new_bubble)
 end
 
-function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plus,Eratio_minus,Rn,ad_fac)
+function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plus,Eratio_minus,Rn,ad_fac,power)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1].body
@@ -123,7 +123,8 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plu
         Xwallarray,θwallarray = constructXarrays(sys.qline[1].arccoord,L,Tref);
         θwallarray .= Tref
 
-        wall = Wall(fluid_type,boil_type,boil_interval,Rn,L_newbubble,Xstations,Xstation_time,Xwallarray,θwallarray);
+        wall = Wall(fluid_type,boil_type,power,boil_interval,Rn,L_newbubble,Xstations,Xstation_time,Xwallarray,θwallarray);
+        # wall = Wall(fluid_type,boil_type,boil_interval,Rn,L_newbubble,Xstations,Xstation_time,Xwallarray,θwallarray);
 
     # end
 
