@@ -51,6 +51,8 @@ function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
     sys_plate = integrator_plate.p
     set_linesource_strength!(sys_plate,qtmp)
 
+    # println(sum(qtmp))
+
     ADI_timemarching!(temperature(integrator_plate),sys_plate,tstep)
     integrator_plate.t += tstep
     

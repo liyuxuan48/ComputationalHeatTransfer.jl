@@ -42,8 +42,8 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,�
         Tfe = RigidTransform((-0.7inches,-0.0),0.0)
         Tfe(eb2)
 
-        cb1 = Rectangle(2.5inches,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
-        Tfc = RigidTransform((-0.5inches,-0.0),0.0)
+        cb1 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
+        Tfc = RigidTransform((-2.5inches,-0.0),0.0)
         Tfc(cb1)
 
         cb2 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
@@ -89,8 +89,8 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,�
         Tfe = RigidTransform((0.0inches,-0.0),0.0)
         Tfe(eb1)
 
-        cb1 = Rectangle(2.5inches,0.0648/2 ,1.5*Δx) # 0.02916 = 0.0648/2 
-        Tfc = RigidTransform((-0.5inches,-0.0),0.0)
+        cb1 = Rectangle(0.55inches,0.0648/2,1.5*Δx)
+        Tfc = RigidTransform((-2.5inches,-0.0),0.0)
         Tfc(cb1)
 
         cb2 = Rectangle(0.55inches,0.0648/2,1.5*Δx)

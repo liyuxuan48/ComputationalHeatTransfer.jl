@@ -104,3 +104,15 @@ function stackXpTemp(val::PHPSystem)
 
     return all_Xp,all_θ
 end
+
+@recipe function f(val::PrescribedHeatFluxRegion)
+            fillcolor := :red
+            alpha     := 0.5
+            return val.body
+end
+
+@recipe function f(val::PrescribedHeatModelRegion)
+    fillcolor := :navyblue
+    alpha     := 0.5
+    return val.body
+end

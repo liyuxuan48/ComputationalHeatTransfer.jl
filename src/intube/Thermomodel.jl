@@ -229,7 +229,9 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
 
             # println(dδdt_start)
             # println(dδdt_start)
-            # println(dMdt_latent_start)
+            # println(sum(dMdt_latent_start) + sum(dMdt_latent_end))
+            # println(maximum(dMdt_latent_start_negative))
+            # println(maximum(dMdt_latent_end_negative))
             # println(F_start .* dLdt_start')
             # println(ρₗ .* A_dδdt_left_vapor .* v_vapor_start_final')
 
@@ -381,7 +383,7 @@ function dMdtdynamicsmodel_positive(Xpvapor::Array{Tuple{Float64,Float64},1},sys
 
         dMdt_latent_start[i] = heatflux_start*peri/Hfg[i] + axial_rhs_start
 
-        dMdt_sensible[i] = heatflux_pure_vapor*peri/Hfg[i]
+        dMdt_sensible[i] = heatflux_pure_vapor*peri/Hfg[i] .* 0.0
 
         dMdt_latent_end[i] = heatflux_end*peri/Hfg[i] + axial_rhs_end
         
