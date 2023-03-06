@@ -4,7 +4,7 @@ function merging_affect!(integrator)
 
 
     p = deepcopy(getcurrentsys(integrator.u,integrator.p));
-    δv = 2p.tube.d
+    δv = 0.5*p.wall.L_newbubble
 
     merge_flags = getmerge_flags(δv,p)
     indexmergingsite = sort(findall(x->x == true, merge_flags),rev = true)
@@ -39,7 +39,7 @@ function merging_condition(u,t,integrator)     # only for closed loop tube
 
     p = deepcopy(getcurrentsys(integrator.u,integrator.p));
     # δv = p.tube.d > (integrator.dt*maximum(p.liquid.dXdt)[1]) ? p.tube.d : (integrator.dt*maximum(p.liquid.dXdt)[1])
-    δv = 2p.tube.d
+    δv = 0.5*p.wall.L_newbubble
 
     sys = deepcopy(getcurrentsys(integrator.u,integrator.p));
 

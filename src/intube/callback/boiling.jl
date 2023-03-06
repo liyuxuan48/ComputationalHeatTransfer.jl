@@ -87,8 +87,8 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     d = deepcopy(sys.tube.d)
     Xp = deepcopy(sys.liquid.Xp)
     dXdt = deepcopy(sys.liquid.dXdt)
-    σ = deepcopy(sys.liquid.σ)
-    μₗ = deepcopy(sys.liquid.μₗ)
+    # σ = deepcopy(sys.liquid.σ)
+    # μₗ = deepcopy(sys.liquid.μₗ)
     δstart = deepcopy(sys.vapor.δstart)
     δend = deepcopy(sys.vapor.δend)
     # Astart = getδarea(Ac,d,δstart)
@@ -105,21 +105,21 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     Lfilm_end = deepcopy(sys.vapor.Lfilm_end)
 
 
-    Lvaporplug = XptoLvaporplug(Xp,sys.tube.L,sys.tube.closedornot)
+    # Lvaporplug = XptoLvaporplug(Xp,sys.tube.L,sys.tube.closedornot)
 
     index = getinsertindex(Xp,(Xvapornew[2]+Xvapornew[1])/2,sys.tube.L,sys.tube.closedornot)
 
     # ρinsert = PtoD(Pinsert)
-    Mvapor = getMvapor(sys)
+    # Mvapor = getMvapor(sys)
 
     Linsert = mod(Xvapornew[end] - Xvapornew[1],L)
 
     """let's do constant film thickness for now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"""
-    V = [elem[2] for elem in sys.liquid.dXdt]
-    Vavg = mean(abs.(V))
-    Ca = getCa.(μₗ,σ,Vavg)     
-    ad_fac = Main.ad_fac
-    # δdeposit = Catoδ(d,Ca,adjust_factor=ad_fac)
+    # V = [elem[2] for elem in sys.liquid.dXdt]
+    # Vavg = mean(abs.(V))
+    # Ca = getCa.(μₗ,σ,Vavg)     
+    # ad_fac = Main.ad_fac
+    # # δdeposit = Catoδ(d,Ca,adjust_factor=ad_fac)
     δdeposit = 5e-5
     δstart_new = insert!(δstart,index+1,δdeposit)
     δend_new = insert!(δend,index+1,δdeposit)
@@ -165,25 +165,6 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
 
     # const P in adjacent vapors
     Pnew = insert!(P,index+1,Pinsert)
-
-    # const M in adjacent vapors
-    # Lvaporplug_new = XptoLvaporplug(Xpnew,sys.tube.L,sys.tube.closedornot)
-    # Astart_new = getδarea(Ac,d,δstart_new)
-    # Aend_new = getδarea(Ac,d,δend_new)
-    # Volumevapor_new = getVolumevapor(Ac,Astart_new,Aend_new,Lvaporplug_new,Lfilm_start_new,Lfilm_end_new)
-    # Pnew_left = DtoP(Mvapor[index]/Volumevapor_new[index])
-    # Pnew_right = DtoP(Mvapor[loop_plus_index[index]]/Volumevapor_new[loop_plus_index_new[index]])
-
-    # # println(P[index-2:index+5])
-
-    # # avoid collapse right after boiling
-    # Pnew = insert!(P,index+1,maximum([Pinsert,Pnew_left,Pnew_right]))
-    # splice!(Pnew,index,Pnew_left)
-    # splice!(Pnew,loop_plus_index_new[index],Pnew_right)
-
-    # println(Lfilm_start_new)
-    # println(Lfilm_end_new)
-
 
     Xarraysnew = getnewXarrays(index,Xp,Xpnew,Xarrays,L,closedornot)
     θarraysnew = getnewθarrays(index,Xp,Xpnew,Xarrays,θarrays,L,closedornot)
