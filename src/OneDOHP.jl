@@ -1,5 +1,7 @@
 export inches,gravity,expfileDict
 
+# using Parameters
+
 const inches = 2.54e-2; 
 const gravity = 9.8;
 

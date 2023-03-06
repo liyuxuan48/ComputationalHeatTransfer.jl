@@ -1,6 +1,6 @@
 export OHPConfiguration
 
-function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,Δx::Real;hc2ratio=1/30)
+function OHPConfiguration(configure_type::String,power::Real,Tc::Real,Δx::Real;hc::Real=2300.0,hc2ratio=1/30)
 
     if configure_type == "ASETS-II OHP 1 LARGE HEATER"
         total_heater_area = 2.0inches*2.0inches;
@@ -50,10 +50,15 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,hc::Real,�
         Tfc = RigidTransform((2.45inches,-0.0),0.0)
         Tfc(cb2)
 
+        # cb3 = Rectangle(1.9inches,1.2inches ,1.5*Δx)
+        # Tfc = RigidTransform((0.0,-0.0),0.0)
+        # Tfc(cb3)
+
         eparams1 = PrescribedHeatFluxRegion(qe,eb1);
         eparams2 = PrescribedHeatFluxRegion(qe,eb2);
         cparams1 = PrescribedHeatModelRegion(hc*hc2ratio,Tc,cb1);
         cparams2 = PrescribedHeatModelRegion(hc,Tc,cb2);
+        # cparams3 = PrescribedHeatModelRegion(10.0,Tc,cb3);
 
     return [eparams1,eparams2], [cparams1,cparams2]
     end

@@ -36,7 +36,7 @@ function randomXp(tube::Tube,numofslugs=30,chargeratio=0.46,σ_charge=0.1)
     X0,real_ratio
 end
 
-function L_to_boiltime(L_new_bubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
+function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     P = vapor.P[1]
     property = SaturationFluidProperty(fluid_type,PtoT(P));
 
@@ -63,10 +63,10 @@ function L_to_boiltime(L_new_bubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
 
     interp_Rtot = LinearInterpolation(L_equivalent, t);
 
-    return interp_Rtot(L_new_bubble)
+    return interp_Rtot(L_newbubble)
 end
 
-function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plus,Eratio_minus,Rn,ad_fac,power)
+function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,power)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1].body
@@ -99,31 +99,32 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,δfilm,Eratio_plu
 
         # Vapor
         Hᵥ = 0.0 # Nusselt number 4.36
-        P = 0*zeros(length(X0)) .+ TtoP(Tref);
-        δfilm_deposit = δfilm;
-        δstart = 0*zeros(length(X0)) .+ δfilm ;
-        δend = 0*zeros(length(X0)) .+ δfilm ;
+        P_initial = 0*zeros(length(X0)) .+ TtoP(Tref);
+        δfilm = 2e-5
+        δstart_initial = 0*zeros(length(X0)) .+ δfilm ;
+        δend_initial = 0*zeros(length(X0)) .+ δfilm ;
 
         Lvaporplug = XptoLvaporplug(X0,L,tube.closedornot)
-        Lfilm_start = 0.01 .* Lvaporplug
-        Lfilm_end = 0.01 .* Lvaporplug
+        Lfilm_start_initial = 0.01 .* Lvaporplug
+        Lfilm_end_initial = 0.01 .* Lvaporplug
         δmin = 2e-6
-        vapors=Vapor(ad_fac,Hᵥ,p_fluid.kₗ,δmin,Eratio_plus,Eratio_minus,P,δfilm_deposit,δstart,δend,Lfilm_start,Lfilm_end);
+        # vapors=Vapor(ad_fac,Hᵥ,p_fluid.kₗ,δmin,Eratio_plus,Eratio_minus,P,δfilm_deposit,δstart,δend,Lfilm_start,Lfilm_end);
+        vapors=Vapor(k = p_fluid.kₗ,P=P_initial,δstart=δstart_initial,δend=δend_initial,Lfilm_start=Lfilm_start_initial,Lfilm_end=Lfilm_end_initial);
 
         # Wall
-        ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d)
+        # ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d)
         nucleatenum = 1000
         Xstations = sort(rand(nucleatenum) .* L);
         Xstation_time = zeros(nucleatenum);
 
         boil_type = "wall T"
-        L_newbubble = 4tube_d
+        L_newbubble = 8tube_d
         # boil_interval = L_to_boiltime(L_newbubble,Rn,fluid_type,vapors::Vapor,tube::Tube)
         boil_interval = 1.0
         Xwallarray,θwallarray = constructXarrays(sys.qline[1].arccoord,L,Tref);
         θwallarray .= Tref
 
-        wall = Wall(fluid_type,boil_type,power,boil_interval,Rn,L_newbubble,Xstations,Xstation_time,Xwallarray,θwallarray);
+        wall = Wall(fluid_type=fluid_type,boil_type=boil_type,power=power,L_newbubble=L_newbubble,Xstations=Xstations,boiltime_stations=Xstation_time,Xarray=Xwallarray,θarray=θwallarray);
         # wall = Wall(fluid_type,boil_type,boil_interval,Rn,L_newbubble,Xstations,Xstation_time,Xwallarray,θwallarray);
 
     # end
@@ -166,17 +167,21 @@ mutable struct SimulationResult
     tube_hist_θwall  ::Vector{Any}
     boil_hist        ::Vector{Any}
     plate_T_hist     ::Vector{Any}
+    integrator_tube  ::Any
+    integratpr_plate ::Any
 end
 
-function SimulationResult()
+function SimulationResult(int_tube,int_plate)
     
     boil_hist=[]
     plate_T_hist = []
     tube_hist_u  = []
     tube_hist_t = []
     tube_hist_θwall = []
+    integrator_tube = deepcopy(int_tube)
+    integrator_plate = deepcopy(int_plate)
     
-    return SimulationResult(tube_hist_t,tube_hist_u,tube_hist_θwall,boil_hist,plate_T_hist)
+    return SimulationResult(tube_hist_t,tube_hist_u,tube_hist_θwall,boil_hist,plate_T_hist,integrator_tube,integrator_plate)
 end
 
 function store!(sr,integrator_tube,integrator_plate)

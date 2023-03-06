@@ -124,6 +124,8 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     δstart_new = insert!(δstart,index+1,δdeposit)
     δend_new = insert!(δend,index+1,δdeposit)
 
+    # compsensate "both films too short" case
+
     Nvapor = length(P)
     loop_plus_index = [2:Nvapor;1]
     loop_plus_index_new = [3:Nvapor+1;1:2]
@@ -134,13 +136,17 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     # println(Lfilm_start_new)
     # println(Lfilm_end_new)
 
+    Lliquid_adjust = 0
     max_index = findmax([Lfilm_start_new[index], Lfilm_end_new[index]])[2]
     if max_index == 1 && Lfilm_start_new[index] > Linsert/2
         splice!(Lfilm_start_new,index,Lfilm_start_new[index]-Linsert/2)
     elseif max_index == 2 && Lfilm_end_new[index] > Linsert/2
         splice!(Lfilm_end_new,index,Lfilm_end_new[index]-Linsert/2)
     else
-        println("pure vapor too short")
+        δarea_deposit = getδarea(Ac,d,δdeposit)
+        δfac = δarea_deposit / (Ac - δarea_deposit)
+        Lliquid_adjust = -0.5*δfac*sys.wall.L_newbubble
+        println("left films too short")
     end
 
     max_index = findmax([Lfilm_start_new[loop_plus_index_new[index]], Lfilm_end_new[loop_plus_index_new[index]]])[2]
@@ -149,10 +155,12 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     elseif max_index == 2 && Lfilm_end_new[loop_plus_index_new[index]] > Linsert/2
         splice!(Lfilm_end_new,loop_plus_index_new[index],Lfilm_end_new[loop_plus_index_new[index]]-Linsert/2)
     else
-        println("pure vapor too short")
+        δarea_deposit = getδarea(Ac,d,δdeposit)
+        δfac = δarea_deposit / (Ac - δarea_deposit)
+        Lliquid_adjust = -0.5*δfac*sys.wall.L_newbubble
+        println("right films too short")
     end
 
-    Lliquid_adjust = 0
     Xpnew = getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
 
     # const P in adjacent vapors

@@ -100,8 +100,8 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             F_end = ρₗ .* Ac .* 4 .* δend .* (d .- δend) ./ (d^2)
             C_end = ρₗ .* Ac .* 4 .* (d .- 2δend) ./ (d^2)
 
-            L0threshold_film = 4e-4
-            L0threshold_pure_vapor = 1e-3
+            L0threshold_film = 0.05*sys.wall.L_newbubble
+            L0threshold_pure_vapor = 0.3*sys.wall.L_newbubble
 
             dLdt_start_normal = -(dMdt_latent_start_positive .* Eratio_plus .+ dMdt_latent_start_negative .* Eratio_minus) ./ F_start - v_vapor_left_normal
             dLdt_end_normal = -(dMdt_latent_end_positive .* Eratio_plus .+ dMdt_latent_end_negative .* Eratio_minus) ./ F_end + v_vapor_right_normal
@@ -156,47 +156,6 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             dLdt_start = sum(he_matrix_start .* dLdt_matrix_start,dims=1)
             dLdt_end = sum(he_matrix_end .* dLdt_matrix_end,dims=1)
 
-
-            # println(v_vapor_right_case5[6])
-            # println(v_vapor_right_normal[6])
-            # println(v_momentum[6])
-            # println(Astart ./ 4e-3)
-            # println(Aend ./ 4e-3)
-            # println(A_dδdt_left_vapor ./ 4e-3)
-            # println(A_dδdt_right_vapor ./ 4e-3)
-            # println(he_matrix_start)
-            # println(he_matrix_end)
-            # println(Lfilm_start)
-            # println(Lfilm_end)
-
-
-            # println(v_vapor_left_case5[6])
-            # println(v_vapor_left_normal[6])
-            # println(v_momentum_vapor[6])
-            # println(Adeposit[6:7])
-
-            # println(v_vapor_start_final[6])
-            # println(v_vapor_end_final[6])
-
-            # dLdt_start = zeros(numofvaporbubble)
-            # dLdt_end = zeros(numofvaporbubble)
-
-            # # knowing interface  velocities, get dδdt from heat transfer and film mass flow
-
-            # dδdt_start_phasechange = (-dMdt_latent_start .- (-dMdt_latent_start_positive .* Eratio)) ./ (C_start .* Lfilm_start) 
-            # dδdt_end_phasechange = (-dMdt_latent_end .- (-dMdt_latent_end_positive .* Eratio)) ./ (C_end .* Lfilm_end) 
-
-            # dδdt_start_film_normal = (- ρₗ .* A_dδdt_left_vapor .* v_vapor_start_final' + F_start .* v_vapor_start_final') ./ (C_start .* Lfilm_start) 
-            # dδdt_end_film_normal = - (- ρₗ .* A_dδdt_right_vapor .* v_vapor_end_final' + F_end .* v_vapor_end_final') ./ (C_end .* Lfilm_end)
-
-            # dδdt_start_phasechange_case4 = dδdt_start_phasechange
-            # dδdt_end_phasechange_case4 = dδdt_end_phasechange
-
-
-
-            # dδdt_start_normal = (-dMdt_latent_start .- (-dMdt_latent_start_positive .* Eratio)) ./ (C_start .* Lfilm_start)  + (- ρₗ .* A_dδdt_left_vapor .* v_vapor_start_final' + F_start .* v_vapor_start_final') ./ (C_start .* Lfilm_start) 
-            # dδdt_end_normal = (-dMdt_latent_end .- (-dMdt_latent_end_positive .* Eratio)) ./ (C_end .* Lfilm_end) - (- ρₗ .* A_dδdt_right_vapor .* v_vapor_end_final' + F_end .* v_vapor_end_final') ./ (C_end .* Lfilm_end)
-
             dδdt_start_normal = (-dMdt_latent_start .- F_start .* dLdt_start' .- ρₗ .* A_dδdt_left_vapor  .* v_vapor_left_normal) ./ (C_start .* Lfilm_start) 
             dδdt_end_normal = (-dMdt_latent_end     .- F_end   .* dLdt_end'   .+ ρₗ .* A_dδdt_right_vapor .* v_vapor_right_normal) ./ (C_end .* Lfilm_end)
 
@@ -212,41 +171,6 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             dδdt_start = sum(he_matrix_start .* dδdt_matrix_start,dims=1)
             dδdt_end = sum(he_matrix_end .* dδdt_matrix_end,dims=1)
 
-            # dδdt_start_case4 = (-dMdt_latent_start .- F_start .* dLdt_start' .+ ρₗ .* A_dδdt_left_vapor .* dLdt_start') ./ (C_start .* Lfilm_start) 
-            # dδdt_end_case4 = (-dMdt_latent_end .- F_end .* dLdt_end' .+ ρₗ .* A_dδdt_right_vapor .* dLdt_start') ./ (C_end .* Lfilm_end)
-
-            # println(F_start)
-            # println(dLdt_start)
-            # println(dMdt_latent_start)
-            # println(A_dδdt_left_vapor)
-            # println(v_vapor_start_final)
-
-            # println(dδdt_start_phasechange)
-            # println(dδdt_start_film)
-
-            # println(dδdt_end_phasechange)
-            # println(dδdt_end_film)
-
-            # println(dδdt_start)
-            # println(dδdt_start)
-            # println(sum(dMdt_latent_start) + sum(dMdt_latent_end))
-            # println(maximum(dMdt_latent_start_negative))
-            # println(maximum(dMdt_latent_end_negative))
-            # println(F_start .* dLdt_start')
-            # println(ρₗ .* A_dδdt_left_vapor .* v_vapor_start_final')
-
-            # println(-dMdt_latent_start .- F_start .* dLdt_start' .- ρₗ .* A_dδdt_left_vapor .* v_vapor_start_final')
-
-            # he_dδdt_start_positive = dδdt_start_normal .> 0
-            # he_dδdt_end_positive = dδdt_end_normal .> 0
-            # he_dδdt_start_toobig = δstart .> 1e-4
-            # he_dδdt_start_toosmall = δstart .< 2e-6
-            # he_dδdt_end_toobig = δend .> 1e-4
-            # he_dδdt_end_toosmall = δend .< 2e-6
-
-            # dδdt_start = (1 .- (he_dδdt_start_toosmall .* (1 .- he_dδdt_start_positive) .+ he_dδdt_start_toobig .* he_dδdt_start_positive)) .* dδdt_start_normal
-            # # println((1 .- div.((he_dδdt_end_toosmall .* (1 .- he_dδdt_end_positive) .+ he_dδdt_end_toobig .* he_dδdt_end_positive),2)))
-            # dδdt_end = (1 .- ((he_dδdt_end_toosmall .* (1 .- he_dδdt_end_positive) .+ he_dδdt_end_toobig .* he_dδdt_end_positive))) .* dδdt_end_normal
 
         for i = 1:numofliquidslug
                 du[2*i-1] = v_liquid_left_final[i]

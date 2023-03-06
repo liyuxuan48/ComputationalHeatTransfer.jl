@@ -3,7 +3,7 @@
 export PHPSystem_nomapping,PHPSystem,Tube,Evaporator,Condenser,Liquid,Vapor,Wall,Mapping
 # ,PHPResult
 
-# using ..Tools
+using Parameters
 
 """
 Tube is a struct containing tube geometries
@@ -67,15 +67,14 @@ Vapor is a struct containing vapor properties at a ref temperature
 end
 """
 
-mutable struct Vapor
-    ad_fac::Float64
-    Hᵥ::Float64
+@with_kw mutable struct Vapor
+    ad_fac::Float64 = 1.3
+    Hᵥ::Float64     = 0.0
     k::Float64
-    δmin::Float64
-    Eratio_plus::Float64
-    Eratio_minus::Float64
+    δmin::Float64   = 2e-6
+    Eratio_plus::Float64 = 0.15
+    Eratio_minus::Float64 = 0.0
     P::Array{Float64,1}
-    δfilm_deposit::Float64
     δstart::Array{Float64,1}
     δend::Array{Float64,1}
     Lfilm_start::Array{Float64,1}
@@ -91,13 +90,13 @@ Wall is a struct containing wall properties
 end
 """
 
-mutable struct Wall
+@with_kw mutable struct Wall
     fluid_type::String
     boil_type::String
     power::Float64
-    boil_interval::Float64
-    Rn::Float64
-    L_newbubble::Float64
+    boil_interval::Float64     = 1.0
+    Rn::Float64                = 3e-6
+    L_newbubble::Float64       = 4e-3
     Xstations::Array{Float64,1}
     boiltime_stations::Array{Float64,1}
     Xarray::Array{Float64,1}
