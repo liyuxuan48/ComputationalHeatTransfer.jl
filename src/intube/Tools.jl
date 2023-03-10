@@ -1,6 +1,6 @@
 using CartesianGrids
 
-export getheight, # get actrual height of the tube
+export getheight,delta, # get actrual height of the tube
 XMtovec,XMδtovec,vectoXM,vectoXMδ,XMδLtovec,vectoXMδL, # transfer Xp,dXdt,M,δ to the state vector
 XptoLvaporplug,XptoLliquidslug,getXpvapor, # transfer Xp to the length of vapors, length of liquids, and Xp for vapor.
 ifamongone,ifamong,constructXarrays,
@@ -40,6 +40,8 @@ function getheight(Xp::Array{Tuple{Float64,Float64},1},L2D::Float64,angle::Float
 
     return height
 end
+
+delta(n) = n != 0
 
 """
     This function is to transform Xp, dXdt of the interface, and M of the vapor to form our state vector u

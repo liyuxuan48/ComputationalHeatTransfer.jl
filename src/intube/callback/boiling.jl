@@ -146,7 +146,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
         δarea_deposit = getδarea(Ac,d,δdeposit)
         δfac = δarea_deposit / (Ac - δarea_deposit)
         Lliquid_adjust = -0.5*δfac*sys.wall.L_newbubble
-        println("left films too short")
+        # println("left films too short")
     end
 
     max_index = findmax([Lfilm_start_new[loop_plus_index_new[index]], Lfilm_end_new[loop_plus_index_new[index]]])[2]
@@ -158,7 +158,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
         δarea_deposit = getδarea(Ac,d,δdeposit)
         δfac = δarea_deposit / (Ac - δarea_deposit)
         Lliquid_adjust = -0.5*δfac*sys.wall.L_newbubble
-        println("right films too short")
+        # println("right films too short")
     end
 
     Xpnew = getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)

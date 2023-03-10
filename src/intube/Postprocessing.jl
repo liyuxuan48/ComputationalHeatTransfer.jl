@@ -1,8 +1,9 @@
 export getcurrentsys,getRTD,getconfig,getghist,getthist,getgt,getsysfinal,getwetness,getV,getδ,getHtmp_marker,
-translateOHPdata,getTcurve,oneDtwoDtransform,get_boil_matrix
+translateOHPdata,getTcurve,oneDtwoDtransform,get_boil_matrix,get1DTandP
 
 using Statistics
 using SparseArrays 
+# using Interpolations
 
 """
     give a new u and an old system, return a new system sysnew
@@ -105,9 +106,9 @@ function getRTD(xf,Onum)
     else
         return error
     end
-    RTDt = (1:size(RTD,1));
+    RTDt = (0:size(RTD,1)-1);
     
-    RTD,RTDt
+    RTDt,Float64.(RTD)
 end
 
 function getconfig(filepath)
@@ -234,21 +235,25 @@ function translateOHPdata(OHPdata::Dict{String, Any})
     sysfinal,ohp,integrator_plate,integrator_tube,boil_hist,plate_T_hist
 end
 
-function getTcurve(x,y,OHPdata)
+function getTcurve(x::Vector,y::Vector,SimulationResult::SimulationResult)
     
-    sys = OHPdata["integrator_plate"].p
-    plate_T_hist = OHPdata["SimulationResult"].plate_T_hist
+    sys = SimulationResult.integrator_plate.p
+    plate_T_hist = SimulationResult.plate_T_hist
     X =  VectorData(x,y);
     H = Regularize(X,cellsize(sys),I0=origin(sys.grid))
     g = ScalarData(X);
     ghist = getghist(g,H,plate_T_hist);
-    thist = OHPdata["SimulationResult"].tube_hist_t; 
+    thist = SimulationResult.tube_hist_t; 
     
-    ghist,thist
+    thist,hcat(ghist...)
 end
 
-function oneDtwoDtransform(ξ::Vector,OHPdata::Dict{String, Any})
-    plate_sys = OHPdata["integrator_plate"].p
+function getTcurve(plate_sensors::Tuple,SimulationResult)
+    getTcurve(plate_sensors[1],plate_sensors[2],SimulationResult)
+end
+
+function oneDtwoDtransform(ξ,sr::SimulationResult)
+    plate_sys = sr.integrator_plate.p
     ql = plate_sys.qline[1]
     interp_linear_x = LinearInterpolation(ql.arccoord, ql.body.x,extrapolation_bc = Line());
     interp_linear_y = LinearInterpolation(ql.arccoord, ql.body.y,extrapolation_bc = Line());
@@ -259,15 +264,15 @@ function oneDtwoDtransform(ξ::Vector,OHPdata::Dict{String, Any})
     x2D,y2D
 end
 
-function get_boil_matrix(OHPdata;boil_dt = 0.1)
+function get_boil_matrix(SimuResult::SimulationResult;boil_dt = 0.1)
     
-    boil_hist = OHPdata["SimulationResult"].boil_hist;
+    boil_hist = SimuResult.boil_hist;
     
     boil_station_hist = [elem[1] for elem in boil_hist]
     boil_t_hist = [elem[2] for elem in boil_hist]
     boil_data = Array(reshape([boil_station_hist;boil_t_hist], length(boil_t_hist),2));
     
-    Xstations = OHPdata["integrator_tube"].p.wall.Xstations;
+    Xstations = SimuResult.integrator_tube.p.wall.Xstations;
     tend = boil_data[end,2]
 #     boil_dt = 0.1;
     
@@ -287,9 +292,26 @@ function get_boil_matrix(OHPdata;boil_dt = 0.1)
     boil_num_x = sum(boil_matrix, dims=2);
     t_boil = boil_dt:boil_dt:boil_dt*length(boil_num_t)
     
-    integrator_tube = OHPdata["integrator_tube"]
+    integrator_tube = SimuResult.integrator_tube
     ξ = integrator_tube.p.wall.Xstations
-    x2D_boil,y2D_boil = oneDtwoDtransform(ξ::Vector,OHPdata::Dict{String, Any})
+    x2D_boil,y2D_boil = oneDtwoDtransform(ξ::Vector,SimuResult)
     
-    boil_data,boil_num_x,boil_num_t,t_boil,x2D_boil,y2D_boil
+    boil_data,boil_num_x,boil_num_t,t_boil,x2D_boil,y2D_boil,boil_dt
+end
+
+function get1DTandP(xsensors::Vector, SimuResult::SimulationResult)
+    θhist = []
+    phist = []
+    sysfinal = get
+    for i in eachindex(SimuResult.tube_hist_u)
+        tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+        ptemp = tube_sys.mapping.P_interp_liquidtowall[xsensors]
+        θtemp = PtoT.(ptemp)
+        push!(phist, ptemp)
+        push!(θhist, θtemp)
+    end
+    phist1D = Float64.(hcat(phist...)')
+    θhist1D = Float64.(hcat(θhist...)');
+    
+    θhist1D,phist1D
 end

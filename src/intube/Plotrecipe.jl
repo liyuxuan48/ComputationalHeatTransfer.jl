@@ -1,9 +1,478 @@
+export OHP,OHPTemp,OHPSlug,OHPPres,OHPSuper,OHPTexp,OHPTcurve,OHPCond,OHPV,OHP1DT,OHP1DP,OHP1DΔT,OHPTwall
+
 using RecipesBase
+using Plots
+
+mutable struct OHP end
+
+mutable struct OHPTemp end
+mutable struct OHPSlug end
+mutable struct OHPPres end
+mutable struct OHPSuper end
+
+mutable struct OHPTexp end
+mutable struct OHPTcurve end
+mutable struct OHPCond end
+mutable struct OHPV end
+
+mutable struct OHP1DT end
+mutable struct OHP1DP end
+mutable struct OHP1DΔT end
+mutable struct OHPTwall end
+
+# mutable struct OHP end
+
+@recipe function f(::OHP, SimuResult::SimulationResult)
+    xlim = SimuResult.grid.xlim[1]
+    ylim = SimuResult.grid.xlim[2]
+
+    ohp = SimuResult.integrator_plate.p.qline[1].body # one body only for now:)
+    tube_sys = SimuResult.integrator_tube.p
+    L = tube_sys.tube.L
+
+    xlabel --> "x [m]"
+    ylabel --> "y [m]"
+
+    xlims := xlim
+    ylims := ylim
+
+    fillalpha := 0
+    framestyle := :box
+
+    linecolor := :blue
+    
+    ohp
+end
+
+
+@recipe function f(::OHPTemp, i::Int64, SimuResult::SimulationResult)
+    grid = SimuResult.grid
+    plate_T = SimuResult.plate_T_hist[i]
+    tube_hist_t = SimuResult.tube_hist_t
+
+    time := tube_hist_t[i]
+    
+    OHPTemp(),plate_T,grid
+end
+
+@recipe function f(::OHPTemp, plate_T::Nodes, grid::PhysicalGrid; time =:none)
+    seriestype --> :heatmap
+    xlabel --> "x [m]"
+    ylabel --> "y [m]"
+    legend --> true
+    
+    xlimit --> grid.xlim[1]
+    ylimit --> grid.xlim[2]
+    
+    colorbar_title --> "\n T[K]"
+    right_margin --> 5Plots.mm
+
+    if time != :none
+    # @series begin
+    annotation --> [(0.0, 0.04, string("time = ", round(time, digits=2), "[s]"))]
+    # end
+    end
+    
+    plate_T,grid
+end
+
+@recipe function f(::OHPSlug, i::Int64, SimuResult::SimulationResult)
+    adjust = 1e-2;
+    
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    # tube_sys.wall.θarray = deepcopy(temperature_linesource(SimuResult.integrator_plate))
+    
+    tube_hist_t = SimuResult.tube_hist_t
+    
+    Hₗ = SimuResult.integrator_tube.p.liquid.Hₗ
+    Htmp = sys_to_Harray(tube_sys)
+    Htmp_marker = round.(div.(Htmp,Hₗ-1e-10))
+    
+    grid = SimuResult.grid
+    ohp = SimuResult.integrator_plate.p.qline[1].body
+    
+    # seriestype --> :heatmap
+    xlabel --> "x [m]"
+    ylabel --> "y [m]"
+    fillalpha := 0
+    linewidth := 2.0
+    clim      :=(0,2)
+    line_z    := Htmp_marker
+    linecolor := palette([:red,  :blue, :yellow])
+    bbox_inches := "tight"
+    border  := :none
+
+    # legend --> true
+    
+    xlimit --> grid.xlim[1]
+    ylimit --> grid.xlim[2]
+
+    annotation := [(-0.052+adjust, -0.028, "dry vapor"),(-0.01+0.007+adjust, -0.028, "vapor with film"),
+    (0.04+0.002+adjust, -0.028, "liquid"),(0.0, 0.028, string("time = ", round(tube_hist_t[i], digits=2), "[s]"))]
+
+    @series begin
+        # annotation := (0, 0, "Look up!")
+        seriestype := :scatter
+        color := :red
+        [-0.07+adjust],[-0.028]
+    end
+
+    @series begin
+        seriestype := :scatter
+        color := :yellow
+        [-0.03+adjust],[-0.028]
+    end
+
+    @series begin
+        seriestype := :scatter
+        color := :blue
+        [0.03+adjust],[-0.028]
+    end
+    
+    ohp
+end
+
+@recipe function f(::OHPPres, i::Int64, SimuResult::SimulationResult)
+    adjust = 1e-2;
+
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    # tube_sys.wall.θarray = deepcopy(temperature_linesource(SimuResult.integrator_plate))
+    
+    tube_hist_t = SimuResult.tube_hist_t
+    
+    Ptmp = tube_sys.mapping.P_interp_liquidtowall[tube_sys.wall.Xarray]
+    
+    grid = SimuResult.grid
+    ohp = SimuResult.integrator_plate.p.qline[1].body
+    
+    # seriestype --> :heatmap
+    xlabel --> "x [m]"
+    ylabel --> "y [m]"
+    fillalpha := 0
+    linewidth := 2.0
+    clim      := (minimum(Ptmp),maximum(Ptmp))
+    line_z    := Ptmp
+    # clim         := :batlow
+    linecolor := :autumn1
+    bbox_inches := "tight"
+    border  := :none
+
+    # color := palette(:heat, 3)
+    # colorbar_title --> "\n P[Pa]"
+    right_margin --> 5Plots.mm
+    # colorbar --> true
+    # legend --> true
+    # grid --> true
+    
+    xlimit --> grid.xlim[1]
+    ylimit --> grid.xlim[2]
+
+    annotation := [(-0.03, -0.028, "low pressure"),
+    (0.04, -0.028, "high pressure"),(0.0, 0.028, string("time = ", round(tube_hist_t[i], digits=2), "[s]"))]
+
+    @series begin
+        # annotation := (0, 0, "Look up!")
+        seriestype := :scatter
+        color := :red
+        [-0.07+adjust],[-0.028]
+    end
+
+    # @series begin
+    #     seriestype := :scatter
+    #     color := :red
+    #     [-0.03+adjust],[-0.028]
+    # end
+
+    @series begin
+        seriestype := :scatter
+        color := :yellow
+        [0.01],[-0.028]
+    end
+    ohp
+end
+
+@recipe function f(::OHPSuper, i::Int64, SimuResult::SimulationResult)
+    adjust = 1e-2;
+
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    # tube_sys.wall.θarray = deepcopy(temperature_linesource(SimuResult.integrator_plate))
+    
+    tube_hist_t = SimuResult.tube_hist_t
+    
+    # Twall = tube_sys.mapping.θ_interp_walltoliquid[tube_sys.wall.Xarray]
+    Twall = SimuResult.tube_hist_θwall[i]
+    Tsat = PtoT(tube_sys.mapping.P_interp_liquidtowall[tube_sys.wall.Xarray])
+
+    ΔT = Twall - Tsat
+
+    ΔTmin = RntoΔT(SimuResult.integrator_tube.p.wall.Rn,291.2,SimuResult.integrator_tube.p.wall.fluid_type,SimuResult.integrator_tube.p.tube.d)
+    
+    grid = SimuResult.grid
+    ohp = SimuResult.integrator_plate.p.qline[1].body
+    
+    # seriestype --> :heatmap
+    xlabel --> "x [m]"
+    ylabel --> "y [m]"
+    fillalpha := 0
+    linewidth := 2.0
+    clim      := (ΔTmin-1e-9,ΔTmin+1e-9)
+    line_z    := ΔT
+    # clim         := :batlow
+    linecolor := palette([:gray,:red], 2)
+    bbox_inches := "tight"
+    border  := :none
+
+    # color := palette(:heat, 3)
+    # colorbar_title --> "\n P[Pa]"
+    right_margin --> 5Plots.mm
+    # colorbar --> true
+    # legend --> true
+    # grid --> true
+    
+    xlimit --> grid.xlim[1]
+    ylimit --> grid.xlim[2]
+
+    annotation := [(0.0, -0.028, string("ΔT > critical value ",round(ΔTmin, digits=3), "[K]")),(0.0, 0.028, string("time = ", round(tube_hist_t[i], digits=2), "[s]"))]
+
+    # @series begin
+    #     # annotation := (0, 0, "Look up!")
+    #     seriestype := :scatter
+    #     color := :black
+    #     [-0.07+adjust],[-0.028]
+    # end
+
+    # @series begin
+    #     seriestype := :scatter
+    #     color := :red
+    #     [-0.03+adjust],[-0.028]
+    # end
+
+    @series begin
+        seriestype := :scatter
+        color := :red
+        [-0.06],[-0.028]
+    end
+    ohp
+end
+
+@recipe function f(::OHPTexp, label_for_plotting::Vector, exp_data::Tuple, SimuResult::SimulationResult)  
+    
+    seriestype --> :scatter
+    
+    RTDt = exp_data[1]
+    RTD_T = exp_data[2]
+
+    
+    T0 = SimuResult.integrator_tube.u[end]
+    
+    title := "temperature curve"
+    linewidth := 2
+#     legend := :topleft
+    
+    xlabel:="time [s]"
+    ylabel:="T-T₀ [K]"
+    
+    n = length(label_for_plotting)
+    color := palette(:default)[1:n]'
+    
+#     palette := :tab10
+#     ribbon := 1
+    
+#     xlimit = (0.0,SimuResult.tube_hist_t[end])
+    
+    
+    label := string.("RTD", label_for_plotting')
+    
+    RTDt,RTD_T[:,label_for_plotting] .- RTD_T[1,label_for_plotting]'
+end
+
+@recipe function f(::OHPTcurve, label_for_plotting::Vector, sensor_data::Tuple, SimuResult::SimulationResult)  
+    
+    thist = sensor_data[1]
+    ghist = sensor_data[2]
+    
+    T0 = SimuResult.integrator_tube.u[end]
+    
+    title := "temperature curve"
+    linewidth := 2
+#     legend := :topleft
+    
+    xlabel:="time [s]"
+    ylabel:="T-T₀ [K]"
+    
+    xlimit := (0.0,thist[end])
+    ylimit := (0.0,maximum(ghist[:,label_for_plotting] .- T0))
+    
+#     ribbon := 1
+    n = length(label_for_plotting)
+    color := palette(:default)[1:n]'
+    
+    
+    label := string.("RTD", label_for_plotting')
+    
+    thist,ghist[:,label_for_plotting] .- T0
+end
+
+@recipe function f(::OHPCond, label_for_conductance::Tuple, sensor_data::Tuple, exp_data::Tuple, SimuResult::SimulationResult)  
+    
+    i1 = label_for_conductance[1]
+    i2 = label_for_conductance[2]
+     
+    thist = sensor_data[1]
+    ghist = sensor_data[2]
+    
+    RTDt = exp_data[1]
+    RTD = exp_data[2]
+    
+    power = SimuResult.integrator_tube.p.wall.power
+    
+    T0 = SimuResult.integrator_tube.u[end]
+    
+    title := "thermal conductance"
+    linewidth := 2
+#     legend := :topleft
+    
+    xlabel:="time [s]"
+    ylabel:="C [W/K]"
+    
+    xlimit --> (0.0,thist[end])
+    ylimit --> (0.0,20.0)
+    
+#     ribbon := 1
+#     n = length(label_for_plotting)
+#     color := palette(:default)[1:n]'
+    
+    label := string.("RTD", i1, "-RTD", i2)
+    
+    @series begin
+        # annotation := (0, 0, "Look up!")
+        seriestype := :scatter
+#         color := :red
+        label := string.("RTD", i1, "-RTD", i2, " exp")
+        RTDt,power./(RTD[:,i1] .- RTD[:,i2])
+    end
+    
+    thist,power./(ghist[:,i1] .-ghist[:,i2])
+end
+
+@recipe function f(::OHPV, SimuResult::SimulationResult)  
+    
+    sysfinal = getcurrentsys.(SimuResult.tube_hist_u,[SimuResult.integrator_tube.p]);
+    thist = SimuResult.tube_hist_t
+    
+    Vavg_hist = []
+    Vabsavg_hist = []
+    Vmax_hist = []
+    Vmin_hist = []
+    for sysi in sysfinal
+        V = [elem[2] for elem in sysi.liquid.dXdt]
+        Vabsavg = mean(abs.(V))
+        Vavg = mean(V)
+        Vmax = maximum((V))
+        Vmin = minimum((V))
+
+        push!(Vavg_hist, Vavg)
+        push!(Vabsavg_hist, Vabsavg)
+        push!(Vmax_hist, Vmax)
+        push!(Vmin_hist, Vmin)
+
+    end
+
+    title := "thermal conductance"
+    linewidth := 2
+    
+    xlabel:="time [s]"
+    ylabel:="C [W/K]"
+    label :="|v| avg"
+    
+    xlimit --> (0.0,thist[end])
+    
+    @series begin
+        # label := string.("RTD", i1, "-RTD", i2, " exp")
+        
+        fillalpha := 0.35
+        c := :blue
+        fillrange := Float64.(Vmin_hist)
+        fillcolor :=:green
+        thist,Vmax_hist
+    end
+    
+    @series begin
+        # label := string.("RTD", i1, "-RTD", i2, " exp")
+            fillalpha := 0.0
+#         fillcolor :=:green
+        c := :blue
+        thist,Vmin_hist
+    end
+    
+    @series begin
+        # label := string.("RTD", i1, "-RTD", i2, " exp")
+        c := :yellow
+        label :="v avg"
+        thist,Vavg_hist
+    end
+    
+    c := :red
+    
+    thist,Vabsavg_hist
+end
+
+@recipe function f(::OHP1DT,i::Int64,SimuResult::SimulationResult)
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
+
+    plottype := "T"
+    tube_sys
+end
+
+@recipe function f(::OHP1DP,i::Int64,SimuResult::SimulationResult)
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
+
+    plottype := "P"
+    tube_sys
+end
+
+@recipe function f(::OHP1DΔT,i::Int64,SimuResult::SimulationResult)
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
+    L = tube_sys.tube.L
+
+    ΔTmin = RntoΔT(SimuResult.integrator_tube.p.wall.Rn,291.2,SimuResult.integrator_tube.p.wall.fluid_type,SimuResult.integrator_tube.p.tube.d)
+
+    @series begin
+        # label := string.("RTD", i1, "-RTD", i2, " exp")
+        c := :red
+        linestyle := :dash
+        linewidth := 2
+        label :="critical ΔT"
+        [0,L],[ΔTmin,ΔTmin]
+    end
+
+    plottype := "ΔT"
+    tube_sys
+end
+
+@recipe function f(::OHPTwall,i::Int64,SimuResult::SimulationResult)
+    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
+
+    c := :blue
+
+    label := "wall T [K]"
+    linewidth := 2
+    ylabel := "wall T [K]"
+
+    tube_sys.wall.Xarray,SimuResult.tube_hist_θwall[i]
+end
 
 @recipe function f(val::PHPSystem;plottype="T")
 
     # T0 = 295.0
     # P0 = 220337
+
+    xlabel := "ξ [m]"
+    linewidth := 2
 
     # layout := (3,1)
     if plottype == "T"
@@ -14,10 +483,12 @@ using RecipesBase
             popfirst!(y1)
 
             legend := false
+            # linecolor := [:red, :blue]
+            # color := palette(:tab10)[2]
             color_palette  := :seaborn_dark
-            title := "OHP temperatures"
-            xlabel := "ξ [m]"
-            ylabel := "T [K]"
+            # title := "OHP temperatures"
+            # xlabel := "ξ [m]"
+            ylabel := "OHP temperatures T [K]"
             # y1 = y1 .* T0
 
             return x1,y1
@@ -26,9 +497,13 @@ using RecipesBase
 
             x2,y2 = stackXpTemp(val)
 
-            legend := false
+            label := "ΔT"
             color_palette  := :seaborn_dark
-            title := "OHP ΔT"
+            color := palette(:seaborn_dark)[1]
+            # title := "OHP ΔT"
+
+            # xlabel := "ξ [m]"
+            ylabel := "OHP superheat ΔT [K]"
 
             x2 = x2[1]
             y2 = y2[1]
@@ -48,7 +523,10 @@ using RecipesBase
 
             legend := false
             color_palette  := :seaborn_dark
-            title := "OHP pressures"
+            # title := "OHP pressures"
+
+            # xlabel := "ξ [m]"
+            ylabel := "OHP pressures P [Pa]"
 
             popfirst!(x3)
             popfirst!(y3)
@@ -104,6 +582,13 @@ function stackXpTemp(val::PHPSystem)
 
     return all_Xp,all_θ
 end
+
+# @recipe function f(val::BasicBody)
+#     fillalpha  := 0
+#     linecolor  := :black
+#     framestyle := :box
+#     return val
+# end
 
 @recipe function f(val::PrescribedHeatFluxRegion)
             fillcolor := :red
