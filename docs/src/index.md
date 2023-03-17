@@ -1,3 +1,14 @@
-# ASETS-II
+# installation
+To install the package:
 
-This is an example of a simulation package for conjugate heat transfer of an oscillating heat pipe. SI units are used and units are emitted
+
+```julia
+] add https://github.com/liyuxuan48/ComputationalHeatTransfer.jl.git
+```
+
+in julia
+
+
+```julia
+using ComputationalHeatTransfer
+```
