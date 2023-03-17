@@ -95,6 +95,10 @@ function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
 end
 
 function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,power)
+    initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
+end
+
+function initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]

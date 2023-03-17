@@ -1,10 +1,4 @@
 ```julia
-using Pkg
-Pkg.activate(dirname(pwd())) # using current environment for development
-```
-
-
-```julia
 using Interact
 using UnPack
 ```
@@ -12,9 +6,6 @@ using UnPack
 
 ```julia
 using ComputationalHeatTransfer
-using LaTeXStrings
-using JLD2
-using Interpolations
 using Plots
 gr()  
 ```
@@ -50,7 +41,7 @@ end
 
 ```julia
 @gif for i in eachindex(t)
-    plot(OHPTemp(),i,SimuResult,clim=(291.2,292.0))
+    plot(OHPTemp(),i,SimuResult,clim=(291.2,294.0))
 end
 ```
 
@@ -224,4 +215,9 @@ scatter!(x2D_boil,y2D_boil,
 ```julia
 plot(t_boil,boil_num_t./boil_dt,
 color=:orange, legend=:topleft, ylabel="f [HZ]",xlabel="time [s]", label="overall boiling frequency")
+```
+
+
+```julia
+
 ```

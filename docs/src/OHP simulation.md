@@ -1,4 +1,4 @@
-# ASETS-II
+# ASETS-II cases simulation
 
 This is an example of a simulation package for conjugate heat transfer of an oscillating heat pipe. SI units are used and units are emitted
 
@@ -6,7 +6,7 @@ This is an example of a simulation package for conjugate heat transfer of an osc
 
 **specify properties** : Solid property, Fluid property
 
-**set the geometries** : Computational domain, OHP shapes, Heaters/Condensers
+**set the geometries** : Computational domain, Heaters/Condensers, OHP shapes
 
 **construct the systems** : Fluid system(1D), HeatConduction system(2D)
 
@@ -17,28 +17,18 @@ This is an example of a simulation package for conjugate heat transfer of an osc
 **save/examine**
 
 ## Packages
-If you need to update the ComputationalHeatTransfer package, I suggest you activate the package's path as your current environment. If you don't need to modify the code within the packge, you don't have to run this block.
-
-
-```julia
-using Pkg
-Pkg.activate(dirname(pwd())) # using current environment for development
-```
 
 Firstly, let's import the necessary packages, you may need to install them for the first time.
 
 
 ```julia
 using ComputationalHeatTransfer # our main package
-using LaTeXStrings # for latex strings
-using JLD2 # for file input/output
 using ProgressMeter # to have a progessbar when runing the simulation
-using XLSX # for reading experimental data in CSV format
 using Plots # for plotting
 gr()  #ploting backend (the fastest one)
 ```
 
-# specify properties
+# Specify properties
 
 ### Solid Physical parameters
 
@@ -64,7 +54,7 @@ fluid_type = "Butane"
 p_fluid = SaturationFluidProperty(fluid_type,Tref)
 ```
 
-# Plate Conduction Part
+# Set the geometries
 
 ### Geometry parameters
 The 2D domain is of rectangular shape (slightly different from ASETS-II). In the future it can be of arbitrary shape using the immersedlayers.jl package.
@@ -135,6 +125,8 @@ end
 plt
 ```
 
+# Construct the systems
+
 ### Create HeatConduction system
 The solid module dealing with the 2D conduction, evaporator, condenser, and the OHP line heat source is constructed here.
 
@@ -150,6 +142,8 @@ sys_tube: fluid module system
 ```julia
 sys_tube = initialize_ohpsys(OHPtype,fluid_type,sys_plate,p_fluid,Tref,power)
 ```
+
+# Initialize
 
 ### set time step
 
@@ -179,6 +173,8 @@ integrator_tube = init(u_tube,tspan,sys_tube); # construct integrator_tube
 sr = SimulationResult(integrator_tube,integrator_plate);
 ```
 
+# Solve
+
 ### Run the simulation and store data
 
 
@@ -194,7 +190,7 @@ sr = SimulationResult(integrator_tube,integrator_plate);
 end
 ```
 
-## Store data
+# Store data
 
 
 ```julia

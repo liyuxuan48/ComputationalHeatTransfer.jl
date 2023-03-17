@@ -16,15 +16,12 @@ Firstly, let's import the necessary packages, you may need to install them for t
 
 ```julia
 using ComputationalHeatTransfer # our main package
-using LaTeXStrings # for latex strings
-using JLD2 # for file input/output
 using ProgressMeter # to have a progessbar when runing the simulation
-using XLSX # for reading experimental data in CSV format
 using Plots # for plotting
 gr()  #ploting backend (the fastest one)
 ```
 
-# Properies
+# # Specify properties
 
 ## Solid Physical parameters
 
@@ -52,7 +49,7 @@ fluid_type = "Butane"
 p_fluid = SaturationFluidProperty(fluid_type,Tref)
 ```
 
-# Plate Conduction Part
+# Set the geometries
 
 ### Geometry parameters
 The 2D domain is of rectangular shape (slightly different from ASETS-II). In the future it can be of arbitrary shape using the immersedlayers.jl package.
@@ -160,6 +157,8 @@ end
 plt
 ```
 
+# Construct the systems
+
 ### Create HeatConduction system
 The solid module dealing with the 2D conduction, evaporator, condenser, and the OHP line heat source is constructed here.
 
@@ -174,8 +173,10 @@ sys_tube: fluid module system
 
 
 ```julia
-sys_tube = initialize_ohpsys(OHPtype,fluid_type,sys_plate,p_fluid,Tref,power)
+sys_tube = initialize_ohpsys(fluid_type,sys_plate,p_fluid,Tref,power)
 ```
+
+# Initialize
 
 ### set time step
 
@@ -205,6 +206,8 @@ integrator_tube = init(u_tube,tspan,sys_tube); # construct integrator_tube
 sr = SimulationResult(integrator_tube,integrator_plate);
 ```
 
+# Solve
+
 ### Run the simulation and store data
 
 
@@ -220,7 +223,7 @@ sr = SimulationResult(integrator_tube,integrator_plate);
 end
 ```
 
-## Store data
+# Store data
 
 
 ```julia
