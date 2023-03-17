@@ -30,6 +30,10 @@ function OHPConfiguration(configure_type::String,power::Real,Tc::Real,Δx::Real;
     return [eparams1,eparams2], [cparams1,cparams2]
     end
 
+    # In one sided condenser case, the "adiabatic" side is not completely adiabatic in the code. 
+    # Instead it is a fraction "hc2ratio" of the regular condenser htc. 
+    # And it is a tunable parameter for now as it is a representaion of the insulation material:)
+
     if (configure_type == "ASETS-II OHP 2 LARGE HEATER") || (configure_type == "ASETS-II OHP 3 LARGE HEATER")
         total_heater_area = 2.0inches*2.0inches;
         qe = power/total_heater_area;

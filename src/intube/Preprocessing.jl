@@ -1,4 +1,32 @@
-export SimulationResult,randomXp,L_to_boiltime,initialize_ohpsys,store!
+export SimulationResult,onesideXp,randomXp,L_to_boiltime,initialize_ohpsys,store!
+
+function onesideXp(ohp,tube::Tube,line)
+    
+    A = line[1]
+    B = line[2]
+    C = line[3]
+    sign = line[4]
+
+    L = tube.L
+    Lmin = tube.d
+    
+    body = ohp.body
+    
+    largeorsmall = A .* body.x .+ B .* body.y .+ C .< 0
+
+    ls_label = xor.(largeorsmall, [largeorsmall[2:end];largeorsmall[1]])
+    X0array_label = findall(!iszero,ls_label)
+    X0array = ohp.arccoord[X0array_label]
+
+    X0 = map(tuple,X0array[1:2:end], X0array[2:2:end])
+
+    # println(typeof(X0))
+
+    Ls = XptoLliquidslug(X0,L)
+    real_ratio = sum(Ls)/L
+    
+    X0,real_ratio
+end
 
 function randomXp(tube::Tube,numofslugs=30,chargeratio=0.46,σ_charge=0.1)
 
@@ -69,8 +97,8 @@ end
 function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,power)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
-    ohp = sys.qline[1].body
-    N=numpts(ohp)
+    ohp = sys.qline[1]
+    N=numpts(ohp.body)
 
     # if OHPtype == "ASETS-II OHP 1 LARGE HEATER" || "ASETS-II OHP 2 LARGE HEATER" || "ASETS-II OHP 3 LARGE HEATER" || "ASETS-II OHP 1 SMALL HEATER" || "ASETS-II OHP 2 SMALL HEATER" || "ASETS-II OHP 3 SMALL HEATER" 
         # tube geometries
@@ -87,12 +115,16 @@ function initialize_ohpsys(OHPtype,fluid_type,sys,p_fluid,Tref,power)
         Nu = 3.60
         Hₗ = p_fluid.kₗ/tube_d * Nu # Nusselt number 3.60
 
-        X0,realratio = randomXp(tube,30)
+        # line = []
+        # X0,realratio = onesideXp(ohp,tube,line)
+        X0,realratio = randomXp(tube,10)
         dXdt0_l = zeros(length(X0))
         dXdt0_r = zeros(length(X0))
         dXdt0 = map(tuple,dXdt0_l,dXdt0_r);
 
-        N=numpts(ohp)
+        N=numpts(ohp.body)
+
+        # println(X0)
         Xarrays,θarrays = constructXarrays(X0,N,Tref,L);
 
         liquids=Liquid(Hₗ,p_fluid.ρₗ,p_fluid.Cpₗ,p_fluid.αₗ,p_fluid.μₗ,p_fluid.σ,X0,dXdt0,Xarrays,θarrays);

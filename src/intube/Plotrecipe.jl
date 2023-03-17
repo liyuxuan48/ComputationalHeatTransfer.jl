@@ -27,8 +27,7 @@ mutable struct OHPTwall end
     ylim = SimuResult.grid.xlim[2]
 
     ohp = SimuResult.integrator_plate.p.qline[1].body # one body only for now:)
-    tube_sys = SimuResult.integrator_tube.p
-    L = tube_sys.tube.L
+    
 
     xlabel --> "x [m]"
     ylabel --> "y [m]"
@@ -39,7 +38,10 @@ mutable struct OHPTwall end
     fillalpha := 0
     framestyle := :box
 
-    linecolor := :blue
+    # color := :reds
+
+    # linecolor := :blue
+    linecolor := palette([:blue,:red], 2)
     
     ohp
 end
@@ -378,11 +380,11 @@ end
 
     end
 
-    title := "thermal conductance"
+    title := "velocity data"
     linewidth := 2
     
     xlabel:="time [s]"
-    ylabel:="C [W/K]"
+    ylabel:="V [m/s]"
     label :="|v| avg"
     
     xlimit --> (0.0,thist[end])
@@ -394,6 +396,7 @@ end
         c := :blue
         fillrange := Float64.(Vmin_hist)
         fillcolor :=:green
+        label := "v range"
         thist,Vmax_hist
     end
     
@@ -401,6 +404,7 @@ end
         # label := string.("RTD", i1, "-RTD", i2, " exp")
             fillalpha := 0.0
 #         fillcolor :=:green
+        label := false
         c := :blue
         thist,Vmin_hist
     end
@@ -421,7 +425,9 @@ end
     tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
 
+    # title --> string(" time = ",SimuResult.tube_hist_t)
     plottype := "T"
+    time := SimuResult.tube_hist_t[i]
     tube_sys
 end
 
@@ -430,6 +436,7 @@ end
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
 
     plottype := "P"
+    time := SimuResult.tube_hist_t[i]
     tube_sys
 end
 
@@ -450,6 +457,7 @@ end
     end
 
     plottype := "ΔT"
+    time := SimuResult.tube_hist_t[i]
     tube_sys
 end
 
@@ -459,6 +467,7 @@ end
 
     c := :blue
 
+    title := string(" time = ", round(SimuResult.tube_hist_t[i]; digits = 3))
     label := "wall T [K]"
     linewidth := 2
     ylabel := "wall T [K]"
@@ -466,13 +475,14 @@ end
     tube_sys.wall.Xarray,SimuResult.tube_hist_θwall[i]
 end
 
-@recipe function f(val::PHPSystem;plottype="T")
+@recipe function f(val::PHPSystem;plottype="T",time=0)
 
     # T0 = 295.0
     # P0 = 220337
 
     xlabel := "ξ [m]"
     linewidth := 2
+    title := string(" time = ", round(time; digits = 3))
 
     # layout := (3,1)
     if plottype == "T"

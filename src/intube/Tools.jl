@@ -311,7 +311,7 @@ end
         L     ::   the length of the 1D tube
 """
 
-function XptoLvaporplug(Xp::Array{Tuple{Float64,Float64},1},L::Float64,closedornot::Bool)
+function XptoLvaporplug(Xp::Vector{Tuple{Float64, Float64}},L::Float64,closedornot::Bool)
 
 if closedornot == false
     maxindex = length(Xp) + 1
@@ -356,7 +356,7 @@ end
         Xp    ::   the locations of all interfaces
 """
 
-function XptoLliquidslug(Xp::Array{Tuple{Float64,Float64},1},L::Float64)
+function XptoLliquidslug(Xp::Vector{Tuple{Float64, Float64}},L::Float64)
 
     Lliquidslug = zeros(length(Xp))
 
@@ -487,7 +487,7 @@ end
     L        :: tube length
 """
 
-function constructXarrays(X0::Array{Tuple{Float64,Float64},1},N,θinitial,L)
+function constructXarrays(X0::Vector{Tuple{Float64, Float64}},N,θinitial,L)
     Xarrays=Array{Array{Float64, 1}, 1}(undef, length(X0))
 
     Lliquid = XptoLliquidslug(X0,L)
