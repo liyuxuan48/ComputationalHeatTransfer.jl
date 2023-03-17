@@ -15,7 +15,7 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo = "<github.com/liyuxuan48/OscillatingHeatPipe.git>",
+    repo = "<github.com/liyuxuan48/ComputationalHeatTransfer.git>",
     target = "build",
     deps = nothing,
     make = nothing,
