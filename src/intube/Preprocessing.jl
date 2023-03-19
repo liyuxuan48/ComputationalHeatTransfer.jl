@@ -169,7 +169,10 @@ function initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power,tube_d=1e-3,peri=4e
     θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall = sys_interpolation(sys0_nomapping)
     mapping = Mapping(θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall);
 
-    sys0 = PHPSystem(tube,liquids,vapors,wall,mapping);
+    boil_hist_int = []
+    cache = Cache(boil_hist_int)
+
+    sys0 = PHPSystem(tube,liquids,vapors,wall,mapping,cache);
 
     # Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
     # M = PtoD(P) .* Lvaporplug .* Ac
@@ -210,7 +213,7 @@ end
 
 function SimulationResult(int_tube,int_plate)
     
-    boil_hist=[]
+    boil_hist= []
     plate_T_hist = []
     tube_hist_u  = []
     tube_hist_t = []
@@ -224,7 +227,9 @@ end
 
 function store!(sr,integrator_tube,integrator_plate)
         
-#         sr.boil_hist = deepcopy(boil_hist);
+        append!(sr.boil_hist,deepcopy(integrator_tube.p.cache.boil_hist));
+        integrator_tube.p.cache.boil_hist = []
+        
         push!(sr.plate_T_hist,deepcopy(temperature(integrator_plate)));
         push!(sr.tube_hist_θwall,deepcopy(integrator_tube.p.wall.θarray))
         push!(sr.tube_hist_u,deepcopy(integrator_tube.u));

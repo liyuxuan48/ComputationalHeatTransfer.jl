@@ -1,8 +1,6 @@
 export vaporMergingAffect!,vaporMergingCondition,vaporMerging
 
 function vaporMergingAffect!(integrator)
-    println("vapor merged!")
-
     p = deepcopy(getcurrentsys(integrator.u,integrator.p));
     δv = p.wall.L_newbubble
 
@@ -121,9 +119,9 @@ function vaporMerging(p,i)
     Mdiff = Mold - Mtemp
 
 
-    println(sum(Mdiff))
-    println(sum(Mold))
-    println(sum(Mtemp))
+    # println(sum(Mdiff))
+    # println(sum(Mold))
+    # println(sum(Mtemp))
 
     A = (Mdiff / Ac / (ρₗ - PtoD(systemp.vapor.P[right_index_after[i]])))
     B = (Lliquidslug_old[i] + p.vapor.Lfilm_end[i] + p.vapor.Lfilm_start[right_index[i]])

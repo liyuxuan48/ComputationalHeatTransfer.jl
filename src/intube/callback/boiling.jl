@@ -35,7 +35,7 @@ function boiling_affect!(integrator)
     for i = 1:length(p.wall.Xstations)
         if ifamong(p.wall.Xstations[i], p.liquid.Xp, p.tube.L) && suitable_for_boiling(p,i) && superheat_flag[i]
 
-                push!(Main.sr.boil_hist,[i,integrator.t]);
+                push!(integrator.p.cache.boil_hist,[i,integrator.t]);
                 b_count += 1;
 
                 if boil_type == "liquid T"

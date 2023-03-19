@@ -1,6 +1,6 @@
 # module Systems
 
-export PHPSystem_nomapping,PHPSystem,Tube,Evaporator,Condenser,Liquid,Vapor,Wall,Mapping
+export PHPSystem_nomapping,PHPSystem,Tube,Evaporator,Condenser,Liquid,Vapor,Wall,Mapping,Cache
 # ,PHPResult
 
 using Parameters
@@ -124,6 +124,16 @@ mutable struct Mapping
 end
 
 """
+Cache is a struct containing
+    boil_hist    ::Vector{Any}
+"""
+
+mutable struct Cache
+    boil_hist    ::Vector{Any}
+end
+
+
+"""
 PHPSystem is a struct containing
     tube    ::Tube
     liquid  ::Liquid
@@ -138,6 +148,7 @@ mutable struct PHPSystem
     vapor   ::Vapor
     wall    ::Wall
     mapping ::Mapping
+    cache   ::Cache
 end
 
 """

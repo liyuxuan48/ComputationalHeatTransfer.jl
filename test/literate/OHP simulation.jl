@@ -57,7 +57,7 @@ for t in tspan[1]:tstep:tspan[2]
 
 end
 
-save_path = dirname(dirname(dirname(pwd())))*"/OHPnume/OHP2_40W_large.jld2"
+save_path = dirname(dirname(dirname(dirname(pwd()))))*"/OHPnume/OHP2_40W_large.jld2"
 save(save_path,"SimulationResult",sr)
 
 
