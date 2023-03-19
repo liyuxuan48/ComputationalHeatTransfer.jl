@@ -22,6 +22,7 @@ include("intube/callback/boiling.jl")
 include("intube/callback/vapormerging.jl")
 include("intube/callback/liquidmerging.jl")
 include("intube/callback/fixdx.jl")
+include("intube/callback/slugbc.jl")
 
 expfileDict = Dict([
     ("O001_H002_P010","20190607_F_PD_%23013_O001_H002_P010_expA.xlsx"),

@@ -316,7 +316,6 @@ function dMdtdynamicsmodel_positive(Xpvapor::Array{Tuple{Float64,Float64},1},sys
 end
 
 function liquidmodel(p::PHPSystem)
-    tstep = Main.tstep
     sys = deepcopy(p)
     θarrays = sys.liquid.θarrays
     # nondihv_tonondihl = 0.0046206704347650325 # temperary variable to fix different nondimensionlaization
@@ -334,14 +333,8 @@ function liquidmodel(p::PHPSystem)
 
     H_rhs = peri / (ρₗ*Cpₗ*Ac)
 
-
-    θarray_temp_wall = zero.(deepcopy(θarrays))
-
-
     for i in eachindex(θarrays)
-
-        Ttuple = getadjacentT(p,i)
-
+        
         xs = sys.liquid.Xarrays[i];
         dx = mod(xs[2] - xs[1], sys.tube.L)
 
@@ -349,31 +342,8 @@ function liquidmodel(p::PHPSystem)
 
         fx = map(θ_wall_inter, xs) - θarrays[i]
         du[i] = α .* laplacian(θarrays[i]) ./ dx ./ dx + Hₗ .* fx .* H_rhs
-        # du[i] = Hₗ .* fx .* H_rhs
-
-        # same temperature B.C.
-        du[i][1] = (Ttuple[1]-θarrays[i][1])/tstep
-        du[i][end] = (Ttuple[end]-θarrays[i][end])/tstep
-
-        # # adiabatic temperature B.C.
-        # du[i][1] += (θarrays[i][1]-θarrays[i][1])/tstep
-        # du[i][end] += (Ttuple[end]-θarrays[i][end])/tstep
-
-        # println(du[i][1])
     end
     return du
-end
-
-function getadjacentT(p::PHPSystem,i::Int64)
-    Tfirst = PtoT(p.vapor.P[i])
-
-    if p.tube.closedornot == true
-        Tlast = i >= length(p.vapor.P) ? PtoT(p.vapor.P[1]) : PtoT(p.vapor.P[i+1])
-    else
-        Tlast = PtoT(p.vapor.P[i+1])
-    end
-
-    (Tfirst,Tlast)
 end
 
 

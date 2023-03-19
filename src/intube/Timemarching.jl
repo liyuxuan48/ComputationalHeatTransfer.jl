@@ -65,7 +65,8 @@ function init(u_tube::Vector{Float64},tspan::Tuple{Any, Any},sys_tube::PHPSystem
     cb_vapormerging =  DiscreteCallback(merging_condition,merging_affect!)
     cb_liquidmerging = DiscreteCallback(vaporMergingCondition,vaporMergingAffect!)
     cb_fixdx =  DiscreteCallback(fixdx_condition,fixdx_affect!)
-    cbst = CallbackSet(cb_fixdx,cb_boiling,cb_vapormerging,cb_liquidmerging);
+    cb_slugbc = DiscreteCallback(slugbc_condition,slugbc_affect!)
+    cbst = CallbackSet(cb_fixdx,cb_boiling,cb_vapormerging,cb_liquidmerging,cb_slugbc);
 
     prob = ODEProblem(ODE_innertube, u_tube, tspan, sys_tube,kwargs...) # construct integrator_tube problem
     return init(prob, alg=RK4(),save_on=false, callback=cbst,maxiters=1e10,kwargs...)

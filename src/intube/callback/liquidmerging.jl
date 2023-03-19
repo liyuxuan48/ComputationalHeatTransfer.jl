@@ -142,13 +142,13 @@ function getmerge_flags(δv,sys)
     merge_flags = Array{Bool,1}(undef, numofmergingsite)
 
     Xpvapor = getXpvapor(sys.liquid.Xp,sys.tube.L,sys.tube.closedornot)
-    dXdt = sys.liquid.dXdt
-    tstep = Main.tstep
+    # dXdt = sys.liquid.dXdt
+    # tstep = Main.tstep
 
     for i in 1:numofmergingsite
-        left_index = i > 1 ? i-1 : numofliquidslug
+        # left_index = i > 1 ? i-1 : numofliquidslug
      # merging bubble length threshold
-        merge_flags[i] = mod(Xpvapor[i][2] + dXdt[i][1]*tstep - Xpvapor[i][1] - dXdt[left_index][2]*tstep, sys.tube.L) < δv || mod(Xpvapor[i][2] - Xpvapor[i][1],sys.tube.L) < δv 
+        merge_flags[i] = mod(Xpvapor[i][2] - Xpvapor[i][1],sys.tube.L) < δv 
     
     end
 
