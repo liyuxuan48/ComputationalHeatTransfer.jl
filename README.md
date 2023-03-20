@@ -1,3 +1,5 @@
+[![Dev](https://img.shields.io/badge/docs-stable-blue.svg)](https://liyuxuan48.github.io/ComputationalHeatTransfer.jl)
+
 # installation
 To install the package:
 
