@@ -98,11 +98,14 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0)
+function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
     N=numpts(ohp.body)
+
+    fluid_type = p_fluid.fluid_type
+    Tref = p_fluid.Tref
 
     # if OHPtype == "ASETS-II OHP 1 LARGE HEATER" || "ASETS-II OHP 2 LARGE HEATER" || "ASETS-II OHP 3 LARGE HEATER" || "ASETS-II OHP 1 SMALL HEATER" || "ASETS-II OHP 2 SMALL HEATER" || "ASETS-II OHP 3 SMALL HEATER" 
         # tube geometries
@@ -229,7 +232,7 @@ function store!(sr,integrator_tube,integrator_plate)
         
         append!(sr.boil_hist,deepcopy(integrator_tube.p.cache.boil_hist));
         integrator_tube.p.cache.boil_hist = []
-        
+
         push!(sr.plate_T_hist,deepcopy(temperature(integrator_plate)));
         push!(sr.tube_hist_θwall,deepcopy(integrator_tube.p.wall.θarray))
         push!(sr.tube_hist_u,deepcopy(integrator_tube.u));
