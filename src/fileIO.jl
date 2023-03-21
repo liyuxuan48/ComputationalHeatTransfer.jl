@@ -34,4 +34,6 @@ function setup_examples(workingdir,filetype="all")
             mkdir(joinpath(workingdir,"numedata"))
         end
     end    
+
+    return
 end
