@@ -98,7 +98,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0,Nu=3.6,slugnum=10,film_fraction=0.5)
+function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0,Nu=3.6,slugnum=30,film_fraction=0.3)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]

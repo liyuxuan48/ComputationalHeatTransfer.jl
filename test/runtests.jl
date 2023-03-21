@@ -3,7 +3,7 @@ using Literate
 
 const GROUP = get(ENV, "GROUP", "All")
 
-notebookdir = "../examples2"
+notebookdir = "../examples"
 docdir = "../docs/src/manual"
 litdir = "./literate"
 
@@ -16,6 +16,7 @@ if GROUP == "All" || GROUP == "Notebooks"
   for (root, dirs, files) in walkdir(litdir)
     for file in files
       #endswith(file,".jl") && startswith(file,"6") && Literate.notebook(joinpath(root, file),notebookdir)
+
       endswith(file,".jl") && Literate.notebook(joinpath(root, file),notebookdir)
     end
   end

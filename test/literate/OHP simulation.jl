@@ -26,6 +26,7 @@
 
 using ComputationalHeatTransfer # our main package
 using Plots # for plotting
+using ProgressMeter # to have a progress bar in the calculation
 
 #   # Specify properties
 
@@ -138,7 +139,7 @@ sys_tube = initialize_ohpsys(sys_plate,p_fluid,power)
 #   ### set time step
 
 
-tspan = (0.0, 1.0); # start time and end time
+tspan = (0.0, 5.0); # start time and end time
 dt_record = 0.01   # saving time interval
 
 tstep = 1e-3     # actrual time marching step
@@ -154,19 +155,19 @@ integrator_tube = init(u_tube,tspan,sys_tube); # construct integrator_tube
 #   ### initialize arrays for saving
 
 
-sr = SimulationResult(integrator_tube,integrator_plate);
+SimuResult = SimulationResult(integrator_tube,integrator_plate);
 
 #   # Solve
 
 #   ### Run the simulation and store data
 
 
-for t in tspan[1]:tstep:tspan[2]
+@showprogress for t in tspan[1]:tstep:tspan[2]
 
     timemarching!(integrator_tube,integrator_plate,tstep)
 
     if (mod(integrator_plate.t,dt_record) < 1e-6) || (mod(-integrator_plate.t,dt_record) < 1e-6)
-        store!(sr,integrator_tube,integrator_plate)
+        store!(SimuResult,integrator_tube,integrator_plate)
     end
 
 end
@@ -174,4 +175,10 @@ end
 #   # Store data
 
 save_path = "../numedata/solution.jld2"
-save(save_path,"SimulationResult",sr)
+save(save_path,"SimulationResult",SimuResult)
+
+# ### take a peek at the solution (more at the PostProcessing notebook)
+
+@gif for i in eachindex(SimuResult.tube_hist_t)
+    plot(OHPTemp(),i,SimuResult,clim=(291.2,294.0))
+end

@@ -8,8 +8,6 @@ function ODE_innertube(u,p,t)
 
     index_dynamics_end = findfirst(x->abs(x+1e10) <= 10^(-1), u)
 
-    # println(u[1:100])
-
     newsys = getcurrentsys(u,sys_init)
 
     dynamicsdu = dynamicsmodel(u[1:index_dynamics_end-1],newsys)
@@ -17,7 +15,7 @@ function ODE_innertube(u,p,t)
     liquiddu = duliquidθtovec(liquidmodel(newsys))
 
     du = [dynamicsdu;liquiddu]
-
+    
     return(du)
 
 end
@@ -69,5 +67,5 @@ function init(u_tube::Vector{Float64},tspan::Tuple{Any, Any},sys_tube::PHPSystem
     cbst = CallbackSet(cb_fixdx,cb_boiling,cb_vapormerging,cb_liquidmerging,cb_slugbc);
 
     prob = ODEProblem(ODE_innertube, u_tube, tspan, sys_tube,kwargs...) # construct integrator_tube problem
-    return init(prob, alg=RK4(),save_on=false, callback=cbst,maxiters=1e10,kwargs...)
+    return init(prob, alg=RK4(),dt=1e-3,save_on=false, callback=cbst,maxiters=1e10,kwargs...)
 end
