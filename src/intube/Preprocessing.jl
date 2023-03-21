@@ -98,7 +98,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0)
+function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0,Nu=3.6,slugnum=10,film_fraction=0.5)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
@@ -119,12 +119,12 @@ function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
         tube = Tube(tube_d,peri,Ac,L,L2D,angle,gravity,closedornot,N,fluid_type);
 
         # liquid
-        Nu = 3.60
+        # Nu = 3.60
         Hₗ = p_fluid.kₗ/tube_d * Nu # Nusselt number 3.60
 
         # line = []
         # X0,realratio = onesideXp(ohp,tube,line)
-        X0,realratio = randomXp(tube,10)
+        X0,realratio = randomXp(tube,slugnum)
         dXdt0_l = zeros(length(X0))
         dXdt0_r = zeros(length(X0))
         dXdt0 = map(tuple,dXdt0_l,dXdt0_r);
@@ -137,21 +137,22 @@ function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
         liquids=Liquid(Hₗ,p_fluid.ρₗ,p_fluid.Cpₗ,p_fluid.αₗ,p_fluid.μₗ,p_fluid.σ,X0,dXdt0,Xarrays,θarrays);
 
         # Vapor
-        Hᵥ = 0.0 # Nusselt number 4.36
+        # Hᵥ = 0.0 # Nusselt number 4.36
         P_initial = 0*zeros(length(X0)) .+ TtoP(Tref);
         δfilm = 2e-5
         δstart_initial = 0*zeros(length(X0)) .+ δfilm ;
         δend_initial = 0*zeros(length(X0)) .+ δfilm ;
 
         Lvaporplug = XptoLvaporplug(X0,L,tube.closedornot)
-        Lfilm_start_initial = 0.01 .* Lvaporplug
-        Lfilm_end_initial = 0.01 .* Lvaporplug
-        δmin = 2e-6
+        Lfilm_start_initial =  0.5 .* film_fraction .* Lvaporplug
+        Lfilm_end_initial = 0.5 .* film_fraction .* Lvaporplug
+        # δmin = 2e-6
         # vapors=Vapor(ad_fac,Hᵥ,p_fluid.kₗ,δmin,Eratio_plus,Eratio_minus,P,δfilm_deposit,δstart,δend,Lfilm_start,Lfilm_end);
         vapors=Vapor(k = p_fluid.kₗ,P=P_initial,δstart=δstart_initial,δend=δend_initial,Lfilm_start=Lfilm_start_initial,Lfilm_end=Lfilm_end_initial);
 
         # Wall
         # ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d)
+        nucleate_density = 0.005
         nucleatenum = 1000
         Xstations = sort(rand(nucleatenum) .* L);
         Xstation_time = zeros(nucleatenum);
@@ -159,7 +160,7 @@ function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
         boil_type = "wall T"
         L_newbubble = 8tube_d
         # boil_interval = L_to_boiltime(L_newbubble,Rn,fluid_type,vapors::Vapor,tube::Tube)
-        boil_interval = 1.0
+        # boil_interval = 1.0
         Xwallarray,θwallarray = constructXarrays(sys.qline[1].arccoord,L,Tref);
         θwallarray .= Tref
 

@@ -9,7 +9,7 @@ function setup_examples(workingdir,filetype="all")
         exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../examples")
         for (root, dirs, files) in walkdir(exdir)
             for file in files
-                cp(joinpath(root, file),joinpath(workingdir,file),force=true)
+                cp(joinpath(root, file),joinpath(workingdir,"examples",file),force=true)
                 chmod(joinpath(workingdir,file),0o644)
             end
         end
