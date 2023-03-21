@@ -17,7 +17,7 @@ function setup_examples(workingdir,filetype="all")
 
     if filetype == "all" || filetype == "experiment" 
         if !isdir(workingdir,"expdata") 
-            mkdir(joinpath(workingdir,"examples/expdata"))
+            mkdir(joinpath(workingdir,"expdata"))
         end
 
         exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../examples/expdata")
