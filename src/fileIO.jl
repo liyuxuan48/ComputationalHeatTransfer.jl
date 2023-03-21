@@ -2,7 +2,7 @@ export setup_examples
 
 function setup_examples(workingdir,filetype="all")
     if filetype == "all" || filetype == "notebook" 
-        mkdir(joinpath(workingdir,"examples"),mode = 0o644)
+        mkdir(joinpath(workingdir,"examples"))
         exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../examples")
         for (root, dirs, files) in walkdir(exdir)
             for file in files
@@ -13,7 +13,7 @@ function setup_examples(workingdir,filetype="all")
     end
 
     if filetype == "all" || filetype == "experiment" 
-        mkdir(joinpath(workingdir,"expdata"),mode = 0o644)
+        mkdir(joinpath(workingdir,"expdata"))
         exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../expdata")
         for (root, dirs, files) in walkdir(exdir)
             for file in files
@@ -24,6 +24,6 @@ function setup_examples(workingdir,filetype="all")
     end    
 
     if filetype == "all" || filetype == "simulation" 
-        mkdir(joinpath(workingdir,"numedata"),mode = 0o644)
+        mkdir(joinpath(workingdir,"numedata"))
     end    
 end
