@@ -2,25 +2,25 @@ export setup_examples
 
 function setup_examples(workingdir,filetype="all")
     if filetype == "all" || filetype == "notebook" 
-        if !isdir(workingdir,"examples") 
-            mkdir(joinpath(workingdir,"examples"))
-        end
+        # if !isdir(workingdir,"examples") 
+        #     mkdir(joinpath(workingdir,"examples"))
+        # end
 
         exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../examples")
         for (root, dirs, files) in walkdir(exdir)
             for file in files
-                cp(joinpath(root, file),joinpath(workingdir,"examples",file),force=true)
-                chmod(joinpath(workingdir,"examples",file),0o644)
+                cp(joinpath(root, file),joinpath(workingdir,file),force=true)
+                chmod(joinpath(workingdir,file),0o644)
             end
         end
     end
 
     if filetype == "all" || filetype == "experiment" 
         if !isdir(workingdir,"expdata") 
-            mkdir(joinpath(workingdir,"expdata"))
+            mkdir(joinpath(workingdir,"examples/expdata"))
         end
 
-        exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../expdata")
+        exdir = joinpath(dirname(pathof(ComputationalHeatTransfer)),"../examples/expdata")
         for (root, dirs, files) in walkdir(exdir)
             for file in files
                 cp(joinpath(root, file),joinpath(workingdir,"expdata",file),force=true)
