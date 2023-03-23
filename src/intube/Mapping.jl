@@ -9,6 +9,7 @@ function sys_interpolation(sys)
 
     Xp  = sys.liquid.Xp
 
+    @unpack PtoT = sys.tube
     θ = PtoT.(sys.vapor.P)
     P = sys.vapor.P
     δstart = sys.vapor.δstart

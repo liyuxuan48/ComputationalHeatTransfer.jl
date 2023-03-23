@@ -217,6 +217,7 @@ function dMdtdynamicsmodel(Xpvapor::Array{Tuple{Float64,Float64},1},sys::PHPSyst
     θarrays = sys.liquid.θarrays
     Xarrays = sys.liquid.Xarrays
 
+    @unpack PtoT,PtoHfg = sys.tube
     θ = PtoT.(P)
 
     Hfg = PtoHfg.(P)
@@ -275,6 +276,7 @@ function dMdtdynamicsmodel_positive(Xpvapor::Array{Tuple{Float64,Float64},1},sys
     θarrays = sys.liquid.θarrays
     Xarrays = sys.liquid.Xarrays
 
+    @unpack PtoT,PtoHfg = sys.tube
     θ = PtoT.(P)
 
     Hfg = PtoHfg.(P)

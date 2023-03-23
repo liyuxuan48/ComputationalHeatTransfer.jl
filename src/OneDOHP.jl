@@ -5,7 +5,7 @@ export inches,gravity,expfileDict
 const inches = 2.54e-2; 
 const gravity = 9.8;
 
-
+include("intube/CoolProp.jl")
 include("intube/Systems.jl")
 include("intube/Preprocessing.jl")
 include("intube/Thermomodel.jl")
@@ -13,7 +13,6 @@ include("intube/Tools.jl")
 include("intube/Mapping.jl")
 include("intube/Timemarching.jl")
 include("intube/Postprocessing.jl")
-include("intube/CoolProp.jl")
 include("intube/DrawingOHP.jl")
 # include("intube/FluidProperty.jl")
 include("intube/Heatercondenser.jl")

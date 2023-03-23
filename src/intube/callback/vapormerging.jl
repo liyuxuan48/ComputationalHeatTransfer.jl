@@ -1,6 +1,7 @@
 export vaporMergingAffect!,vaporMergingCondition,vaporMerging
 
 function vaporMergingAffect!(integrator)
+
     p = deepcopy(getcurrentsys(integrator.u,integrator.p));
     δv = p.wall.L_newbubble
 
@@ -32,6 +33,7 @@ function vaporMergingAffect!(integrator)
     δarea_end = Ac .* (1 .- ((d .- 2*δend) ./ d) .^ 2);
 
     volume_vapor = Lvaporplug .* Ac - Lfilm_start .* δarea_start - Lfilm_end .* δarea_end
+    @unpack PtoD = p.tube
     M = PtoD.(p.vapor.P) .* volume_vapor
 
     unew=[XMδLtovec(p.liquid.Xp,p.liquid.dXdt,M,δstart,δend,Lfilm_start,Lfilm_end); liquidθtovec(p.liquid.θarrays)];
@@ -123,6 +125,7 @@ function vaporMerging(p,i)
     # println(sum(Mold))
     # println(sum(Mtemp))
 
+    @unpack PtoD = p.tube
     A = (Mdiff / Ac / (ρₗ - PtoD(systemp.vapor.P[right_index_after[i]])))
     B = (Lliquidslug_old[i] + p.vapor.Lfilm_end[i] + p.vapor.Lfilm_start[right_index[i]])
 

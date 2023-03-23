@@ -2,7 +2,6 @@ export merging_affect!,merging_condition,nucleateboiling,merging
 
 function merging_affect!(integrator)
 
-
     p = deepcopy(getcurrentsys(integrator.u,integrator.p));
     δv = 0.5*p.wall.L_newbubble
 
@@ -27,6 +26,7 @@ function merging_affect!(integrator)
     δarea_end = Ac .* (1 .- ((d .- 2*δend) ./ d) .^ 2);
 
     volume_vapor = Lvaporplug .* Ac - Lfilm_start .* δarea_start - Lfilm_end .* δarea_end
+    @unpack PtoD = p.tube
     M = PtoD.(p.vapor.P) .* volume_vapor
 
     unew=[XMδLtovec(p.liquid.Xp,p.liquid.dXdt,M,δstart,δend,Lfilm_start,Lfilm_end); liquidθtovec(p.liquid.θarrays)];
@@ -69,6 +69,7 @@ function merging(p,i)
 
     # Msection_before = Mvapor[left_index] + Mvapor[i] + Mvapor[i+1] + Mfilm[1][i] + Mfilm[2][i] + Mfilm[1][i] + Mfilm[2][i]
 
+    @unpack PtoD = p.tube
     Linsert = (Mvapor[i] + Mfilm[1][i] + Mfilm[2][i] - 0.5 .* Ac .* Lvaporplug[i] .* (PtoD(p.vapor.P[left_index]) .+ PtoD(p.vapor.P[right_index]))) ./ (ρₗ .* Ac .- 0.5 .* Ac .* (PtoD(p.vapor.P[left_index]) .+ PtoD(p.vapor.P[right_index])))
     # println(Linsert)
     # Linsert = (Mvapor[i] + Mfilm[1][i] + Mfilm[2][i] - Lvaporplug[i] * p.tube.Ac * PtoD(p.vapor.P[i])) ./ p.tube.Ac ./ p.liquid.ρ

@@ -52,6 +52,7 @@ function getcurrentsys(u,sys0)
     # println(M)
     # println(δend)
     # println(volume_vapor ./ Lvaporplug)
+    @unpack DtoP = sys0.tube
     P = DtoP.(ρ)
   
     sysnew.vapor.P = P
@@ -306,6 +307,7 @@ function get1DTandP(xsensors::Vector, SimuResult::SimulationResult)
     for i in eachindex(SimuResult.tube_hist_u)
         tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
         ptemp = tube_sys.mapping.P_interp_liquidtowall[xsensors]
+        @unpack PtoT = tube_sys.tube
         θtemp = PtoT.(ptemp)
         push!(phist, ptemp)
         push!(θhist, θtemp)

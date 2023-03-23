@@ -28,7 +28,18 @@ mutable struct Tube
     closedornot::Bool
     N::Int64  
     fluid_type::String
+    PtoT
+    TtoP
+    PtoD
+    DtoP
+    PtoHfg
 end
+
+function Tube(tube_d,peri,Ac,L,L2D,angle,gravity,closedornot,N,fluid_type);
+    PtoT,TtoP,PtoD,DtoP,PtoHfg = createCoolPropinterpolation(fluid_type::String)
+    Tube(tube_d,peri,Ac,L,L2D,angle,gravity,closedornot,N,fluid_type,PtoT,TtoP,PtoD,DtoP,PtoHfg);
+end
+
 """
 Liquid is a struct containing liquid properties at a ref temperature
     Hₗ::Float64                              heat transfer coefficient between the wall and the pure liquid slug
@@ -94,7 +105,7 @@ end
     fluid_type::String
     boil_type::String
     power::Float64
-    boil_interval::Float64     = 1.0
+    boil_interval::Float64     = 0.1
     Rn::Float64                = 3e-6
     L_newbubble::Float64       = 4e-3
     Xstations::Array{Float64,1}

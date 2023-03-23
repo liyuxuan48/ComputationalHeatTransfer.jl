@@ -203,11 +203,12 @@ end
     
     # Twall = tube_sys.mapping.θ_interp_walltoliquid[tube_sys.wall.Xarray]
     Twall = SimuResult.tube_hist_θwall[i]
+    @unpack PtoT,TtoP = tube_sys.tube
     Tsat = PtoT(tube_sys.mapping.P_interp_liquidtowall[tube_sys.wall.Xarray])
 
     ΔT = Twall - Tsat
 
-    ΔTmin = RntoΔT(SimuResult.integrator_tube.p.wall.Rn,291.2,SimuResult.integrator_tube.p.wall.fluid_type,SimuResult.integrator_tube.p.tube.d)
+    ΔTmin = RntoΔT(SimuResult.integrator_tube.p.wall.Rn,291.2,SimuResult.integrator_tube.p.wall.fluid_type,SimuResult.integrator_tube.p.tube.d,TtoP)
     
     grid = SimuResult.grid
     ohp = SimuResult.integrator_plate.p.qline[1].body
@@ -445,7 +446,9 @@ end
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
     L = tube_sys.tube.L
 
-    ΔTmin = RntoΔT(SimuResult.integrator_tube.p.wall.Rn,291.2,SimuResult.integrator_tube.p.wall.fluid_type,SimuResult.integrator_tube.p.tube.d)
+    @unpack TtoP = tube_sys.tube
+
+    ΔTmin = RntoΔT(SimuResult.integrator_tube.p.wall.Rn,291.2,SimuResult.integrator_tube.p.wall.fluid_type,SimuResult.integrator_tube.p.tube.d,TtoP)
 
     @series begin
         # label := string.("RTD", i1, "-RTD", i2, " exp")
@@ -518,6 +521,7 @@ end
             x2 = x2[1]
             y2 = y2[1]
 
+            @unpack PtoT = val.tube
             y2 -= PtoT(val.mapping.P_interp_liquidtowall.(x2))
 
             # y2 -= nondi_PtoT(val.mapping.P_interp_liquidtowall.(x2))
@@ -554,6 +558,8 @@ end
 function stackXpTemp(val::PHPSystem)
     Xpvapor = getXpvapor(val.liquid.Xp,val.tube.L,val.tube.closedornot)
     # θvapor  = nondi_PtoT.(val.vapor.P)
+    
+    @unpack PtoT = val.tube
     θvapor  = PtoT.(val.vapor.P)
     Xp = val.liquid.Xp
 

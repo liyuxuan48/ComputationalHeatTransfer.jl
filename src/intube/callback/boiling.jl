@@ -20,9 +20,10 @@ function boiling_affect!(integrator)
     Rn = p.wall.Rn
     boil_interval = p.wall.boil_interval
 
+    @unpack PtoT,TtoP,PtoD = p.tube
     Tref = (PtoT.(maximum(p.vapor.P)) + PtoT.(minimum(p.vapor.P)))/2
 
-    Δθthreshold = RntoΔT(Rn,Tref,fluid_type,d)
+    Δθthreshold = RntoΔT(Rn,Tref,fluid_type,d,TtoP)
 
     # println(Δθthreshold)
   
@@ -339,6 +340,7 @@ end
 
 
 function getsuperheat(Xstation,sys)
+    @unpack PtoT = sys.tube
     Δθ = sys.mapping.θ_interp_walltoliquid(Xstation) - PtoT(sys.mapping.P_interp_liquidtowall(Xstation))
     return Δθ
 end

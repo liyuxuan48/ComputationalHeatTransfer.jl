@@ -28,7 +28,7 @@ function onesideXp(ohp,tube::Tube,line)
     X0,real_ratio
 end
 
-function randomXp(tube::Tube,numofslugs=30,chargeratio=0.46,σ_charge=0.1)
+function randomXp(tube::Tube;numofslugs=30,chargeratio=0.46,σ_charge=0.1)
 
     L = tube.L
     Lmin = tube.d
@@ -66,6 +66,8 @@ end
 
 function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     P = vapor.P[1]
+
+    @unpack PtoT,PtoD,PtoHfg = tube
     property = SaturationFluidProperty(fluid_type,PtoT(P));
 
     tube_d = tube.d
@@ -76,7 +78,7 @@ function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     Hfg = PtoHfg(P)
     Tref = PtoT(P)
     ρv = PtoD(P)
-    ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d)
+    ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d,TtoP)
 
     A = (2 * (ΔTthres/Tref) * Hfg*ρv/ρₗ)^0.5
     Ja = ΔTthres*Cpₗ*ρₗ/ρv/Hfg
@@ -98,7 +100,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0,Nu=3.6,slugnum=30,film_fraction=0.3)
+function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0,Nu=3.6,slugnum=30,film_fraction=0.3)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
@@ -124,7 +126,7 @@ function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
 
         # line = []
         # X0,realratio = onesideXp(ohp,tube,line)
-        X0,realratio = randomXp(tube,slugnum)
+        X0,realratio = randomXp(tube,numofslugs=slugnum)
         dXdt0_l = zeros(length(X0))
         dXdt0_r = zeros(length(X0))
         dXdt0 = map(tuple,dXdt0_l,dXdt0_r);
@@ -138,6 +140,7 @@ function initialize_ohpsys(sys,p_fluid,power,tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
 
         # Vapor
         # Hᵥ = 0.0 # Nusselt number 4.36
+        @unpack TtoP = tube
         P_initial = 0*zeros(length(X0)) .+ TtoP(Tref);
         δfilm = 2e-5
         δstart_initial = 0*zeros(length(X0)) .+ δfilm ;
@@ -199,6 +202,8 @@ function newstate(sys0::PHPSystem)
     
 
     Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
+
+    @unpack PtoD = sys0.tube
     M = PtoD(P) .* Lvaporplug .* Ac
 
     u=[XMδLtovec(X0,dXdt0,M,δstart,δend,Lfilm_start,Lfilm_end); liquidθtovec(sys0.liquid.θarrays)];

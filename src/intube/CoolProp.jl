@@ -1,26 +1,30 @@
 using CoolProp
 using Interpolations
 
-export nondi_PtoT,nondi_TtoP,nondi_PtoD,nondi_DtoP,PtoT,TtoP,PtoD,DtoP,PtoHfg,SaturationFluidProperty
+export createCoolPropinterpolation,SaturationFluidProperty
 
-fluid_type = "Butane"
+# fluid_type = "Butane"
 
-Tcrit = CoolProp.PropsSI("Tcrit",fluid_type);
-Tmin = CoolProp.PropsSI("Tmin",fluid_type);
+function createCoolPropinterpolation(fluid_type::String,numofpoints=10000)
+    Tcrit = CoolProp.PropsSI("Tcrit",fluid_type);
+    Tmin = CoolProp.PropsSI("Tmin",fluid_type);
 
-Trange = LinRange(Tmin, Tcrit, 10000)
-Prange = CoolProp.PropsSI.("P","T",Trange,"Q",1.0,fluid_type);
-Drange = CoolProp.PropsSI.("D","T",Trange,"Q",1.0,fluid_type);
+    Trange = LinRange(Tmin, Tcrit, numofpoints)
+    Prange = CoolProp.PropsSI.("P","T",Trange,"Q",1.0,fluid_type);
+    Drange = CoolProp.PropsSI.("D","T",Trange,"Q",1.0,fluid_type);
 
-Hᵥrange = CoolProp.PropsSI.("H","T",Trange,"Q",1.0,fluid_type);
-Hₗrange = CoolProp.PropsSI.("H","T",Trange,"Q",0.0,fluid_type);
-Hfgrange = Hᵥrange .- Hₗrange
+    Hᵥrange = CoolProp.PropsSI.("H","T",Trange,"Q",1.0,fluid_type);
+    Hₗrange = CoolProp.PropsSI.("H","T",Trange,"Q",0.0,fluid_type);
+    Hfgrange = Hᵥrange .- Hₗrange
 
-PtoT = LinearInterpolation(Prange, Trange);
-TtoP = LinearInterpolation(Trange, Prange);
-PtoD = LinearInterpolation(Prange, Drange);
-DtoP = LinearInterpolation(Drange, Prange);
-PtoHfg = LinearInterpolation(Prange, Hfgrange);
+    PtoT = LinearInterpolation(Prange, Trange);
+    TtoP = LinearInterpolation(Trange, Prange);
+    PtoD = LinearInterpolation(Prange, Drange);
+    DtoP = LinearInterpolation(Drange, Prange);
+    PtoHfg = LinearInterpolation(Prange, Hfgrange);
+
+    PtoT,TtoP,PtoD,DtoP,PtoHfg
+end
 
 
 struct SaturationFluidProperty

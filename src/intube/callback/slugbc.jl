@@ -5,7 +5,6 @@ function slugbc_condition(u,t,integrator)
 end
 
 function slugbc_affect!(integrator)
-
     sys = deepcopy(getcurrentsys(integrator.u,integrator.p));
     unew = deepcopy(integrator.u)
 
@@ -28,6 +27,7 @@ end
 
 
 function getadjacentT(p::PHPSystem,i::Int64)
+    @unpack PtoT = p.tube
     Tfirst = PtoT(p.vapor.P[i])
 
     if p.tube.closedornot == true

@@ -621,6 +621,7 @@ end
 
 function getMvapor(sys)
 
+    @unpack PtoD = sys.tube
     ρᵥ = PtoD.(sys.vapor.P)
     Ac = sys.tube.Ac
     δstart = sys.vapor.δstart
@@ -828,7 +829,7 @@ function Catoδ(d,Ca;adjust_factor=1,δmin=3e-6,δmax=1e-4)
     end
 end
 
-function RntoΔT(Rn,Tref,fluid_type,d)
+function RntoΔT(Rn,Tref,fluid_type,d,TtoP)
     p_fluid = SaturationFluidProperty(fluid_type,Tref);
 
     Rkg = p_fluid.R/p_fluid.M
