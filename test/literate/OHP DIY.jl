@@ -55,19 +55,7 @@ ylim = (-Ly/2,Ly/2) # plate y limits
 
 Δx,Δt_max = setstepsizes(params.α,gridPe=8.0,fourier=0.3)
 
-#   ### Set up the evaporators and condensers
-
-#   Right now, the OHPtype looks up a preset dictionary of OHP evaporators and
-#   condensers.
-
-#   You can also customize them in the OHP DIY notebook
-
-OHPtype = "ASETS-II OHP 2 LARGE HEATER"
-power = 40 # total heater power in watts
-Tc = Tref; # condenser temperature
-eparams,cparams = OHPConfiguration(OHPtype,power,Tc,Δx);
-
-#   ### Set up OHP channel's shape
+#   # Set up the evaporators and condensers
 
 #   In the "OHP simulation" notebook, I use "OHPtype" to look up a preset dictionary of OHP evaporators and condensers.
 
