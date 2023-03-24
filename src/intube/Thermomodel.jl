@@ -42,7 +42,14 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
 
     Lvaporplug = XptoLvaporplug(Xp,sys.tube.L,sys.tube.closedornot)
     Lliquidslug = XptoLliquidslug(Xp,sys.tube.L)
-    height = getheight(Xp,sys.tube.L2D,sys.tube.angle)
+
+    heightg_interp = sys.mapping.heightg_interp
+    Xp1 = [elem[1] for elem in sys.liquid.Xp]
+    Xp2 = [elem[2] for elem in sys.liquid.Xp]
+    heightg = map(tuple,heightg_interp(Xp1),heightg_interp(Xp2))
+
+    # println(heightg)
+
     Xpvapor = getXpvapor(Xp,sys.tube.L,sys.tube.closedornot)
 
     ρₗ = sys.liquid.ρ
@@ -54,7 +61,7 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
     f_coefficient = f_churchill.(Re_list .+ 1e-4)
     dXdt_to_stress = -0.125 .* f_coefficient .* ρₗ .* V .* abs.(V)
     rhs_dXdt = peri .* Lliquidslug .* dXdt_to_stress ./ lhs
-    rhs_g = Ac*ρₗ*g*cos(angle) ./ lhs
+    rhs_g = Ac*ρₗ ./ lhs
 
     if sys.tube.closedornot == false
         println("open loop not supported!")
@@ -177,9 +184,9 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
                 du[2*i] = v_liquid_right_final[i]
 
                 if i != numofliquidslug
-                    du[2*numofliquidslug + 2*i-1] = rhs_dXdt[i] + rhs_g[i]*(height[i][1]-height[i][end]) + rhs_press[i] * (P[i]-P[i+1]) + rhs_dLdt[i]
+                    du[2*numofliquidslug + 2*i-1] = rhs_dXdt[i] + rhs_g[i]*(heightg[i][1]-heightg[i][end]) + rhs_press[i] * (P[i]-P[i+1]) + rhs_dLdt[i]
                 else
-                    du[2*numofliquidslug + 2*i-1] = rhs_dXdt[i] + rhs_g[i]*(height[i][1]-height[i][end]) + rhs_press[i] * (P[i]-P[1]) + rhs_dLdt[i]
+                    du[2*numofliquidslug + 2*i-1] = rhs_dXdt[i] + rhs_g[i]*(heightg[i][1]-heightg[i][end]) + rhs_press[i] * (P[i]-P[1]) + rhs_dLdt[i]
                 end                
 
                 du[2*numofliquidslug + 2*i] = du[2*numofliquidslug + 2*i-1]

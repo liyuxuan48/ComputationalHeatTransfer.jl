@@ -1,5 +1,7 @@
 export SimulationResult,onesideXp,randomXp,L_to_boiltime,initialize_ohpsys,store!
 
+using Interpolations
+
 function onesideXp(ohp,tube::Tube,line)
     
     A = line[1]
@@ -100,10 +102,12 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,angle=0.0,Nu=3.6,slugnum=30,film_fraction=0.3)
+function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
+    @unpack x,y = ohp.body
+    
     N=numpts(ohp.body)
 
     fluid_type = p_fluid.fluid_type
@@ -115,10 +119,10 @@ function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
         # peri = 4*tube_d # Tube perimeter
         # Ac = tube_d*tube_d # tube cross-sectional area
         L2D = 133.83*1e-3 # the actual length of the bended pipe in the real world
-        # angle = 0*pi/2 # inclination angle 
+        # g_angle = 0*pi/2 # inclination g_angle 
         closedornot = true
 
-        tube = Tube(tube_d,peri,Ac,L,L2D,angle,gravity,closedornot,N,fluid_type);
+        tube = Tube(tube_d,peri,Ac,L,L2D,g_angle,gravity,closedornot,N,fluid_type);
 
         # liquid
         # Nu = 3.60
@@ -174,7 +178,10 @@ function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,angle
 
     sys0_nomapping = PHPSystem_nomapping(tube,liquids,vapors,wall);
     θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall = sys_interpolation(sys0_nomapping)
-    mapping = Mapping(θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall);
+    gvec = getgvec(g,g_angle);
+    ht = getheightg(gvec,x,y);
+    heightg_interp = LinearInterpolation(Xwallarray,ht,extrapolation_bc = Line())
+    mapping = Mapping(θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall,heightg_interp);
 
     boil_hist_int = []
     cache = Cache(boil_hist_int)

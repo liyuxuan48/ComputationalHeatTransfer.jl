@@ -163,7 +163,7 @@ sys_tube = initialize_ohpsys(sys_plate,p_fluid,power)
   ### set time step
 
 ````@example OHP_simulation
-tspan = (0.0, 1.0); # start time and end time
+tspan = (0.0, 5.0); # start time and end time
 dt_record = 0.01   # saving time interval
 
 tstep = 1e-3     # actrual time marching step
