@@ -1,3 +1,6 @@
+# ComputationalHeatTransfer.jl
+tools for numerical simulation of conductive and convective heat transfer
+
 [![Dev](https://img.shields.io/badge/docs-stable-blue.svg)](https://liyuxuan48.github.io/ComputationalHeatTransfer.jl)
 
 This readme file assumes user already installed the **IJulia** package and got the jupyter notebook running.
