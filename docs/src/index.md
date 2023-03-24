@@ -21,8 +21,10 @@ You may also need to install some other packages to make the notebook run smooth
 After installing the packages, we need to run
 
 ```julia
-using WebIO
-WebIO.install_jupyter_nbextension()
+# within a Julia REPL
+using Conda
+Conda.pip_interop(true)
+Conda.pip("install", "webio_jupyter_extension")
 ```
 
 this will make some interactive features in postprocessing notebook avaliable, but it is not the end of world if you could not make it work:)
