@@ -105,7 +105,7 @@ end
     fluid_type::String
     boil_type::String
     power::Float64
-    boil_interval::Float64     = 0.1
+    boil_interval::Float64     = 1.0
     Rn::Float64                = 3e-6
     L_newbubble::Float64       = 4e-3
     Xstations::Array{Float64,1}
