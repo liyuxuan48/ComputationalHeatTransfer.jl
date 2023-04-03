@@ -121,7 +121,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     # Ca = getCa.(μₗ,σ,Vavg)     
     # ad_fac = Main.ad_fac
     # # δdeposit = Catoδ(d,Ca,adjust_factor=ad_fac)
-    δdeposit = 5e-5
+    δdeposit = maximum([5e-5;δstart;δend]) + 1e-7
     δstart_new = insert!(δstart,index+1,δdeposit)
     δend_new = insert!(δend,index+1,δdeposit)
 
