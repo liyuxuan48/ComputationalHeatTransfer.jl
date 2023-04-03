@@ -102,7 +102,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81)
+function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.15,ηminus=0.0)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
@@ -155,7 +155,7 @@ function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,g_ang
         Lfilm_end_initial = 0.5 .* film_fraction .* Lvaporplug
         # δmin = 2e-6
         # vapors=Vapor(ad_fac,Hᵥ,p_fluid.kₗ,δmin,Eratio_plus,Eratio_minus,P,δfilm_deposit,δstart,δend,Lfilm_start,Lfilm_end);
-        vapors=Vapor(k = p_fluid.kₗ,P=P_initial,δstart=δstart_initial,δend=δend_initial,Lfilm_start=Lfilm_start_initial,Lfilm_end=Lfilm_end_initial);
+        vapors=Vapor(k = p_fluid.kₗ,P=P_initial,δstart=δstart_initial,δend=δend_initial,Lfilm_start=Lfilm_start_initial,Lfilm_end=Lfilm_end_initial,Eratio_plus=ηplus,Eratio_minus=ηminus);
 
         # Wall
         # ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d)
