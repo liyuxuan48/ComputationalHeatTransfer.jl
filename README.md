@@ -48,3 +48,18 @@ This will create three folders in your working directory: examples, expdata, and
 using IJulia
 notebook()
 ```
+
+# Update
+
+Because this package is still work in progress, I may make small modifications and fix some bugs. So I would suggest you to update the package frequently (before loading the package on your first run everyday:) )
+```julia
+using Pkg
+Pkg.update("ComputationalHeatTransfer")
+```
+
+And then, open your jupyter notebook as usual
+
+```julia
+using IJulia
+notebook()
+```
