@@ -102,7 +102,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.15,ηminus=0.0)
+function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,tubeshape="square",g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.15,ηminus=0.0)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
@@ -121,6 +121,14 @@ function initialize_ohpsys(sys,p_fluid,power;tube_d=1e-3,peri=4e-3,Ac=1e-6,g_ang
         L2D = 133.83*1e-3 # the actual length of the bended pipe in the real world
         # g_angle = 0*pi/2 # inclination g_angle 
         closedornot = true
+
+        if tubeshape=="square"
+                peri = tube_d*4
+                Ac = tube_d*tube_d
+        elseif tubeshape=="circle"
+            peri = tube_d*π
+            Ac = tube_d*tube_d*π/4
+        end
 
         tube = Tube(tube_d,peri,Ac,L,L2D,g_angle,gravity,closedornot,N,fluid_type);
 

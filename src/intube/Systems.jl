@@ -106,7 +106,7 @@ end
     boil_type::String
     power::Float64
     boil_interval::Float64     = 1.0
-    Rn::Float64                = 3e-5
+    Rn::Float64                = 3e-6
     L_newbubble::Float64       = 4e-3
     Xstations::Array{Float64,1}
     boiltime_stations::Array{Float64,1}
