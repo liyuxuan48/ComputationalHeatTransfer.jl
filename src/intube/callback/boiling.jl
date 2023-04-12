@@ -144,8 +144,6 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
         # println("right films too short")
     end
 
-    if δstart[]
-
     Xpnew = getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
 
     # const P in adjacent vapors
