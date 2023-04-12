@@ -58,7 +58,7 @@ function fixdx_affect!(integrator)
     Nliquid =  ceil.(Int, Lliquid./p.tube.d)
 
     for i in indexReconstructSite
-        println("reconstruct dx! in", i ," at ",integrator.t)
+        # println("reconstruct dx! in", i ," at ",integrator.t)
 
         p.liquid.Xarrays[i] = constructoneXarray((p.liquid.Xarrays[i][1],p.liquid.Xarrays[i][end]),Nliquid[i],L)
         p.liquid.θarrays[i] = θ_interp_liquidtowall(p.liquid.Xarrays[i])

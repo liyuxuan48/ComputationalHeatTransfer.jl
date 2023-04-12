@@ -296,7 +296,7 @@ end
     
     T0 = SimuResult.integrator_tube.u[end]
     
-    title := "temperature curve"
+    title --> "temperature curve"
     linewidth := 2
 #     legend := :topleft
     
@@ -311,7 +311,7 @@ end
     color := palette(:default)[1:n]'
     
     
-    label := string.("RTD", label_for_plotting')
+    label --> string.("RTD", label_for_plotting')
     
     thist,ghist[:,label_for_plotting] .- T0
 end

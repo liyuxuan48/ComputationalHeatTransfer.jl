@@ -88,13 +88,8 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     d = deepcopy(sys.tube.d)
     Xp = deepcopy(sys.liquid.Xp)
     dXdt = deepcopy(sys.liquid.dXdt)
-    # σ = deepcopy(sys.liquid.σ)
-    # μₗ = deepcopy(sys.liquid.μₗ)
     δstart = deepcopy(sys.vapor.δstart)
     δend = deepcopy(sys.vapor.δend)
-    # Astart = getδarea(Ac,d,δstart)
-    # Aend = getδarea(Ac,d,δend)
-    # δfilm_deposit = deepcopy(sys.vapor.δfilm_deposit)
     
     P = deepcopy(sys.vapor.P)
     L = sys.tube.L
@@ -106,26 +101,16 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     Lfilm_end = deepcopy(sys.vapor.Lfilm_end)
 
 
-    # Lvaporplug = XptoLvaporplug(Xp,sys.tube.L,sys.tube.closedornot)
-
     index = getinsertindex(Xp,(Xvapornew[2]+Xvapornew[1])/2,sys.tube.L,sys.tube.closedornot)
-
-    # ρinsert = PtoD(Pinsert)
-    # Mvapor = getMvapor(sys)
 
     Linsert = mod(Xvapornew[end] - Xvapornew[1],L)
 
     """let's do constant film thickness for now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"""
-    # V = [elem[2] for elem in sys.liquid.dXdt]
-    # Vavg = mean(abs.(V))
-    # Ca = getCa.(μₗ,σ,Vavg)     
-    # ad_fac = Main.ad_fac
-    # # δdeposit = Catoδ(d,Ca,adjust_factor=ad_fac)
-    δdeposit = maximum([5e-5;δstart;δend]) + 1e-7
+    δdeposit = maximum([5e-5;δstart;δend]) + 1e-6
+    # δdeposit = 5e-5
     δstart_new = insert!(δstart,index+1,δdeposit)
     δend_new = insert!(δend,index+1,δdeposit)
 
-    # compsensate "both films too short" case
 
     Nvapor = length(P)
     loop_plus_index = [2:Nvapor;1]
@@ -133,9 +118,6 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
 
     Lfilm_start_new = insert!(Lfilm_start,index+1,0.0)
     Lfilm_end_new = insert!(Lfilm_end,index+1,0.0)
-
-    # println(Lfilm_start_new)
-    # println(Lfilm_end_new)
 
     Lliquid_adjust = 0
     max_index = findmax([Lfilm_start_new[index], Lfilm_end_new[index]])[2]
@@ -162,6 +144,8 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
         # println("right films too short")
     end
 
+    if δstart[]
+
     Xpnew = getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
 
     # const P in adjacent vapors
@@ -170,10 +154,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     Xarraysnew = getnewXarrays(index,Xp,Xpnew,Xarrays,L,closedornot)
     θarraysnew = getnewθarrays(index,Xp,Xpnew,Xarrays,θarrays,L,closedornot)
 
-    # Mvapor_old = getMvapor(sys)
-    # Mfilm_old = getMfilm(sys)
 
-# only for open loop!
     dXdtnew = deepcopy(dXdt) # momentum conservation
     insert!(dXdtnew,index+1,dXdtnew[index])
 
@@ -194,32 +175,16 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     Mvapor_new = sum(getMvapor(sysnew))
     Mfilm_new = sum(sum.(getMfilm(sysnew)))
 
-    # println(Mvapor_old)
-    # println(Mfilm_old)
-    # println(Mvapor_new)
-    # println(Mfilm_new)
-
-
-    # mass_conserv_length = (Mvapor_old + Mfilm_old - Mvapor_new - Mfilm_new) ./ ρₗ ./ getδarea(Ac,d,δdeposit)
-    # max_newvapor_length = mod(Xvapornew[2]-Xvapornew[1],L)
-    # if mass_conserv_length < max_newvapor_length
-        Lfilm_start_new[index+1] = (Mvapor_old + Mfilm_old - Mvapor_new - Mfilm_new) ./ ρₗ ./ getδarea(Ac,d,δdeposit) ./ 2
+ 
+        Lfilm_start_new[index+1] = (Ac*Lliquid_adjust*ρₗ  + Mvapor_old + Mfilm_old - Mvapor_new - Mfilm_new) ./ ρₗ ./ getδarea(Ac,d,δdeposit) ./ 2
         Lfilm_end_new[index+1] = Lfilm_start_new[index+1]
-    # else
-    #     Lfilm_start_new[index+1] = max_newvapor_length*0.9
-    #     Lfilm_end_new[index+1] = Lfilm_start_new[index+1]
-    #     δstart_new[index+1] = getδFromδarea(Ac,d,((Mvapor_old + Mfilm_old - Mvapor_new - Mfilm_new) ./ ρₗ ./ Lfilm_start_new[index+1] ./ 2))
-    #     δend_new[index+1] = δstart_new[index+1]
-    # end
 
-    # println(Lfilm_start_new)
-    # println(Lfilm_end_new)
+        if Lfilm_start_new[index+1] < 0
+            Lfilm_start_new[index+1] = 1e-5
+            Lfilm_end_new[index+1] = Lfilm_start_new[index+1]
+            println("new film length smaller than zero. potential error!")
+        end
 
-    # println(δstart_new[index+1])
-    # println(Lfilm_start_new)
-
-    # sysnew.vapor.δstart = δstart_new
-    # sysnew.vapor.δend = δend_new
     sysnew.vapor.Lfilm_start = Lfilm_start_new
     sysnew.vapor.Lfilm_end = Lfilm_end_new
 
@@ -367,6 +332,7 @@ end
 
 function suitable_for_boiling(p,i)
     suitable_flag =  true
+    L_newbubble = p.wall.L_newbubble
     index_max = length(p.liquid.Xp)
 
 
@@ -376,7 +342,7 @@ function suitable_for_boiling(p,i)
         L_vapor_left =  Lvaporplug[index]
         L_vapor_right = (index == index_max) ? Lvaporplug[1] : Lvaporplug[index + 1]
 
-        suitable_flag = (5*p.tube.d < L_vapor_left) && (5*p.tube.d < L_vapor_right) ? true : false
+        suitable_flag = (1.5*L_newbubble < L_vapor_left) && (1.5*L_newbubble < L_vapor_right) ? true : false
 
 
         L_liquid_left =  mod(p.wall.Xstations[i] - p.liquid.Xp[index][1],p.tube.L)
@@ -385,7 +351,7 @@ function suitable_for_boiling(p,i)
                 # println(L_liquid_left)
                 # println(L_liquid_right)
 
-        if (10*p.tube.d > L_liquid_left) || (10*p.tube.d > L_liquid_right)
+        if (3*L_newbubble> L_liquid_left) || (3*L_newbubble > L_liquid_right)
             suitable_flag = false
         end
 
