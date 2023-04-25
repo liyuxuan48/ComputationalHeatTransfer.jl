@@ -178,7 +178,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
         Lfilm_end_new[index+1] = Lfilm_start_new[index+1]
 
         if Lfilm_start_new[index+1] < 0
-            Lfilm_start_new[index+1] = 1e-5
+            Lfilm_start_new[index+1] = 5e-5
             Lfilm_end_new[index+1] = Lfilm_start_new[index+1]
             println("new film length smaller than zero. potential error!")
         end
