@@ -610,7 +610,8 @@ function Hfilm(δfilm,sys)
     elseif δfilm > δmin
         return  Hᵥ + (δfilm-δmin)*(kₗ/δthreshold - Hᵥ)/(δthreshold-δmin) + 1e-6
     else
-        return Hᵥ  + 1e-6
+        # return Hᵥ  + 1e-6
+        return 0.0
     end
 end
 
