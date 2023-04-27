@@ -102,7 +102,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power;inertia_f=1.5,tube_d=1e-3,tubeshape="square",g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.15,ηminus=0.0)
+function initialize_ohpsys(sys,p_fluid,power;inertia_f=1.5,tube_d=1e-3,tubeshape="square",g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.15,ηminus=0.0,nucleatenum = 1000,L_newbubble = 2tube_d)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
@@ -167,13 +167,13 @@ function initialize_ohpsys(sys,p_fluid,power;inertia_f=1.5,tube_d=1e-3,tubeshape
 
         # Wall
         # ΔTthres = RntoΔT(Rn,Tref,fluid_type,tube_d)
-        nucleate_density = 0.005
-        nucleatenum = 1000
+        # nucleate_density = 0.005
+        # nucleatenum = 1000
         Xstations = sort(rand(nucleatenum) .* L);
         Xstation_time = zeros(nucleatenum);
 
         boil_type = "wall T"
-        L_newbubble = 8tube_d
+        # L_newbubble = 2tube_d
         # boil_interval = L_to_boiltime(L_newbubble,Rn,fluid_type,vapors::Vapor,tube::Tube)
         # boil_interval = 1.0
         Xwallarray,θwallarray = constructXarrays(sys.qline[1].arccoord,L,Tref);
