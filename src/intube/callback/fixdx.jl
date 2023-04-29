@@ -2,16 +2,16 @@ export fixdx_affect!,fixdx_condition
 # boiling_condition,
 function fixdx_condition(u,t,integrator)
 
-        p = deepcopy(getcurrentsys(integrator.u,integrator.p));
+        p = getcurrentsys(integrator.u,integrator.p);
 
         dξ_init = p.tube.L / p.tube.N
 
         δξmax = 2*dξ_init
         δξmin = 0.5*dξ_init
 
-        sys = deepcopy(getcurrentsys(integrator.u,integrator.p));
+        # sys = deepcopy(getcurrentsys(integrator.u,integrator.p));
 
-        ReconstructFlags = getReconstructFlags(δξmin,δξmax,sys)
+        ReconstructFlags = getReconstructFlags(δξmin,δξmax,p)
 
         return sum(ReconstructFlags) != 0
         # return true

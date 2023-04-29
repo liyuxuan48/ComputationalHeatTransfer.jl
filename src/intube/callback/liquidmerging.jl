@@ -37,11 +37,11 @@ end
 
 function merging_condition(u,t,integrator)     # only for closed loop tube
 
-    p = deepcopy(getcurrentsys(integrator.u,integrator.p));
+    p = getcurrentsys(integrator.u,integrator.p);
     # δv = p.tube.d > (integrator.dt*maximum(p.liquid.dXdt)[1]) ? p.tube.d : (integrator.dt*maximum(p.liquid.dXdt)[1])
     δv = 0.5*p.wall.L_newbubble
 
-    sys = deepcopy(getcurrentsys(integrator.u,integrator.p));
+    sys = p
 
     merge_flags = getmerge_flags(δv,sys)
 

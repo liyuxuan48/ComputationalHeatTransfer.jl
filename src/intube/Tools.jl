@@ -826,7 +826,7 @@ function f_churchill(Re,ϵ=0.001)
     f
 end
 
-function Catoδ(d,Ca;adjust_factor=1,δmin=3e-6,δmax=1e-4)
+function Catoδ(d,Ca;adjust_factor=1,δmin=2e-6,δmax=1e-4)
 
     δ = Ca .^ (2/3) ./ (1 .+ Ca .^ (2/3)) .* d ./ 2 .* adjust_factor
     if (δ < δmin)

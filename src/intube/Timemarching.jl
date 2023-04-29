@@ -42,10 +42,10 @@ function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
     
     step!(integrator_tube,tstep,true);
 
-    currentsys = deepcopy(getcurrentsys(integrator_tube.u,integrator_tube.p))
-    currentsys.wall.θarray = deepcopy(temperature_linesource(integrator_plate))
-    integrator_tube.p = deepcopy(currentsys)
-    qtmp = deepcopy(sys_to_heatflux(currentsys))
+    currentsys = getcurrentsys(integrator_tube.u,integrator_tube.p)
+    currentsys.wall.θarray = temperature_linesource(integrator_plate)
+    # integrator_tube.p = deepcopy(currentsys)
+    qtmp = sys_to_heatflux(currentsys)
     sys_plate = integrator_plate.p
     set_linesource_strength!(sys_plate,qtmp)
 

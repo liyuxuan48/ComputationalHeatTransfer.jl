@@ -23,7 +23,6 @@ function getcurrentsys(u,sys0)
 
     Xp,dXdt,M,δstart,δend,Lfilm_start,Lfilm_end = vectoXMδL(u[1:indexes[1]-1])
 
-    # println(u[1:300])
     modX!(Xp,sys0.tube.L)
    
     for i = 1:length(indexes)-1
@@ -31,17 +30,9 @@ function getcurrentsys(u,sys0)
     end
     push!(θliquidrec, u[indexes[end]+1:end])
 
-    sysnew = deepcopy(sys0)
-
-    sysnew.liquid.Xp = Xp
-    sysnew.liquid.dXdt = dXdt
-    sysnew.liquid.θarrays = θliquidrec
-    sysnew.liquid.Xarrays = updateXarrays(Xp,sysnew.liquid.θarrays,sysnew.tube.L)
-
-
     Lvaporplug = XptoLvaporplug(Xp,sys0.tube.L,sys0.tube.closedornot)
 
-    Ac = sysnew.tube.Ac
+    Ac = sys0.tube.Ac
 
     d = sys0.tube.d
     δarea_start = Ac .* (1 .- ((d .- 2*δstart) ./ d) .^ 2);
@@ -55,6 +46,13 @@ function getcurrentsys(u,sys0)
     @unpack DtoP = sys0.tube
     P = DtoP.(ρ)
   
+    sysnew = sys0
+
+    sysnew.liquid.Xp = Xp
+    sysnew.liquid.dXdt = dXdt
+    sysnew.liquid.θarrays = θliquidrec
+    sysnew.liquid.Xarrays = updateXarrays(Xp,sysnew.liquid.θarrays,sysnew.tube.L)
+
     sysnew.vapor.P = P
     sysnew.vapor.δstart = δstart
     sysnew.vapor.δend = δend
@@ -82,7 +80,8 @@ end
 
 function updateXarrays(Xp,θarrays,L)
 
-    Xarrays = zero.(deepcopy(θarrays))
+    # Xarrays = zero.(deepcopy(θarrays))
+    Xarrays = 0 .* θarrays
 
     for i = 1:length(Xarrays)
         if Xp[i][1] < Xp[i][2]
