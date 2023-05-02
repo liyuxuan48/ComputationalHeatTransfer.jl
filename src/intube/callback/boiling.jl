@@ -177,11 +177,12 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     L_adjust = (Mold - Mvapor_new - Mfilm_new - Mliquid_new)./ (ρₗ*Ac)
     
     Lvaporplug = XptoLvaporplug(sysnew.liquid.Xp,sysnew.tube.L,sysnew.tube.closedornot)
+    Lpurevapor = Lvaporplug .- Lfilm_start_new .- Lfilm_end_new
     Lliquidslug = XptoLliquidslug(Xp,sys.tube.L)
 
 
     if L_adjust > 0
-        maxvalueindex = findmax(Lvaporplug)
+        maxvalueindex = findmax(Lpurevapor)
         maxvalue = maxvalueindex[1]
         maxindex = maxvalueindex[2]
 
