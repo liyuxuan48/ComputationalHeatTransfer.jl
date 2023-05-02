@@ -149,10 +149,6 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     # const P in adjacent vapors
     Pnew = insert!(P,index+1,Pinsert)
 
-    Xarraysnew = getnewXarrays(index,Xp,Xpnew,Xarrays,L,closedornot)
-    θarraysnew = getnewθarrays(index,Xp,Xpnew,Xarrays,θarrays,L,closedornot)
-
-
     dXdtnew = deepcopy(dXdt) # momentum conservation
     insert!(dXdtnew,index+1,dXdtnew[index])
 
@@ -165,8 +161,6 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     sysnew.vapor.δend = δend_new
     sysnew.vapor.Lfilm_start = Lfilm_start_new
     sysnew.vapor.Lfilm_end = Lfilm_end_new
-    sysnew.liquid.Xarrays = Xarraysnew
-    sysnew.liquid.θarrays = θarraysnew
 
     # Mvapor_old = sum(getMvapor(sys))
     # Mfilm_old = sum(sum.(getMfilm(sys)))
@@ -198,6 +192,13 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
         else println("boiling error!")
         end
     end
+
+
+    Xarraysnew = getnewXarrays(index,Xp,sysnew.liquid.Xp,Xarrays,L,closedornot)
+    θarraysnew = getnewθarrays(index,Xp,sysnew.liquid.Xp,Xarrays,θarrays,L,closedornot)
+
+    sysnew.liquid.Xarrays = Xarraysnew
+    sysnew.liquid.θarrays = θarraysnew
         # Lfilm_start_new[index+1] = (Ac*Lliquid_adjust*ρₗ  + Mvapor_old + Mfilm_old - Mvapor_new - Mfilm_new) ./ ρₗ ./ getδarea(Ac,d,δdeposit) ./ 2
         # Lfilm_end_new[index+1] = Lfilm_start_new[index+1]
 
