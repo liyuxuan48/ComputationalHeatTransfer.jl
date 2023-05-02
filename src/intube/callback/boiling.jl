@@ -172,7 +172,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     
     Lvaporplug = XptoLvaporplug(sysnew.liquid.Xp,sysnew.tube.L,sysnew.tube.closedornot)
     Lpurevapor = Lvaporplug .- Lfilm_start_new .- Lfilm_end_new
-    Lliquidslug = XptoLliquidslug(Xp,sys.tube.L)
+    Lliquidslug = XptoLliquidslug(Xpnew,sys.tube.L)
 
 
     if L_adjust > 0
