@@ -142,6 +142,7 @@ Cache is a struct containing
 
 mutable struct Cache
     boil_hist    ::Vector{Any}
+    mass ::Float64
 end
 
 

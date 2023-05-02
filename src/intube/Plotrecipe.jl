@@ -81,7 +81,7 @@ end
 @recipe function f(::OHPSlug, i::Int64, SimuResult::SimulationResult)
     adjust = 1e-2;
     
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     # tube_sys.wall.θarray = deepcopy(temperature_linesource(SimuResult.integrator_plate))
     
     tube_hist_t = SimuResult.tube_hist_t
@@ -137,7 +137,7 @@ end
 @recipe function f(::OHPPres, i::Int64, SimuResult::SimulationResult)
     adjust = 1e-2;
 
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     # tube_sys.wall.θarray = deepcopy(temperature_linesource(SimuResult.integrator_plate))
     
     tube_hist_t = SimuResult.tube_hist_t
@@ -196,7 +196,7 @@ end
 @recipe function f(::OHPSuper, i::Int64, SimuResult::SimulationResult)
     adjust = 1e-2;
 
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     # tube_sys.wall.θarray = deepcopy(temperature_linesource(SimuResult.integrator_plate))
     
     tube_hist_t = SimuResult.tube_hist_t
@@ -423,7 +423,7 @@ end
 end
 
 @recipe function f(::OHP1DT,i::Int64,SimuResult::SimulationResult)
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
 
     # title --> string(" time = ",SimuResult.tube_hist_t)
@@ -433,7 +433,7 @@ end
 end
 
 @recipe function f(::OHP1DP,i::Int64,SimuResult::SimulationResult)
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
 
     plottype := "P"
@@ -442,7 +442,7 @@ end
 end
 
 @recipe function f(::OHP1DΔT,i::Int64,SimuResult::SimulationResult)
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
     L = tube_sys.tube.L
 
@@ -465,7 +465,7 @@ end
 end
 
 @recipe function f(::OHPTwall,i::Int64,SimuResult::SimulationResult)
-    tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+    tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
     tube_sys.wall.θarray = SimuResult.tube_hist_θwall[i]
 
     c := :blue

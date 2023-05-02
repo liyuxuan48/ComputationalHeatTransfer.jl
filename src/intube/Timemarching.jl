@@ -8,7 +8,7 @@ function ODE_innertube(u,p,t)
 
     index_dynamics_end = findfirst(x->abs(x+1e10) <= 10^(-1), u)
 
-    newsys = getcurrentsys(u,sys_init)
+    newsys = getcurrentsys!(u,sys_init)
 
     dynamicsdu = dynamicsmodel(u[1:index_dynamics_end-1],newsys)
 
@@ -24,7 +24,7 @@ function ODE_steadyfilm(u,p,t)
 
     index_dynamics_end = findfirst(x->abs(x+1e10) <= 10^(-1), u)
 
-    newsys = getcurrentsys(u,p)
+    newsys = getcurrentsys!(u,p)
 
     dynamicsdu = dynamicsmodel_steadyfilm(u[1:index_dynamics_end-1],newsys)
 
@@ -42,7 +42,7 @@ function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
     
     step!(integrator_tube,tstep,true);
 
-    currentsys = getcurrentsys(integrator_tube.u,integrator_tube.p)
+    currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
     currentsys.wall.θarray = temperature_linesource(integrator_plate)
     # integrator_tube.p = deepcopy(currentsys)
     qtmp = sys_to_heatflux(currentsys)

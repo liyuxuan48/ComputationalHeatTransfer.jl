@@ -1,4 +1,4 @@
-export getcurrentsys,getRTD,getconfig,getghist,getthist,getgt,getsysfinal,getwetness,getV,getδ,getHtmp_marker,
+export getcurrentsys!,getcurrentsys,getRTD,getconfig,getghist,getthist,getgt,getsysfinal,getwetness,getV,getδ,getHtmp_marker,
 translateOHPdata,getTcurve,oneDtwoDtransform,get_boil_matrix,get1DTandP
 
 using Statistics
@@ -9,7 +9,7 @@ using SparseArrays
     give a new u and an old system, return a new system sysnew
 """
 
-function getcurrentsys(u,sys0)
+function getcurrentsys!(u,sys0)
 
         indexes = Int64[]
         θliquidrec = Array[]
@@ -64,6 +64,11 @@ function getcurrentsys(u,sys0)
     sysnew.mapping = Mapping(θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall,heightg_interp)
 
     return sysnew
+end
+
+function getcurrentsys(u,sys0)
+    systemp = deepcopy(sys0)
+    getcurrentsys!(u,systemp)
 end
 
 function modX!(Xp,L)
@@ -154,7 +159,7 @@ end
 function getsysfinal(tube_hist)
     sysfinal = []
     for tube_i in tube_hist
-        push!(sysfinal, deepcopy(getcurrentsys(tube_i.u,tube_i.p)))
+        push!(sysfinal, deepcopy(getcurrentsys!(tube_i.u,tube_i.p)))
     end
     
     sysfinal
@@ -163,7 +168,7 @@ end
 function getsysfinal(tube_hist_u,tube_hist_θwall,integrator_tube)
     sysfinal = []
     for i in eachindex(tube_hist_u)
-        push!(sysfinal, deepcopy(getcurrentsys(tube_hist_u[i],integrator_tube.p)))
+        push!(sysfinal, deepcopy(getcurrentsys!(tube_hist_u[i],integrator_tube.p)))
         sysfinal[i].wall.θarray = tube_hist_θwall[i]
     end
     
@@ -305,7 +310,7 @@ function get1DTandP(xsensors::Vector, SimuResult::SimulationResult)
     phist = []
     sysfinal = get
     for i in eachindex(SimuResult.tube_hist_u)
-        tube_sys = getcurrentsys(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
+        tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
         ptemp = tube_sys.mapping.P_interp_liquidtowall[xsensors]
         @unpack PtoT = tube_sys.tube
         θtemp = PtoT.(ptemp)
