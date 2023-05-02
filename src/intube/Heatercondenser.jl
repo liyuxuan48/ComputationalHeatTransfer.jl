@@ -1,6 +1,6 @@
 export OHPConfiguration
 
-function OHPConfiguration(configure_type::String,power::Real,Tc::Real,Δx::Real;hc::Real=2300.0,hc2ratio=1/20)
+function OHPConfiguration(configure_type::String,power::Real,Tc::Real,Δx::Real;hc::Real=2300.0,hc2ratio=1/30)
 
     if configure_type == "ASETS-II OHP 1 LARGE HEATER"
         total_heater_area = 2.0inches*2.0inches;
