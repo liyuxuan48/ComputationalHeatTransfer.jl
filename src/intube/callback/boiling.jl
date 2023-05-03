@@ -168,27 +168,31 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     Mfilm_new = sum(sum.(getMfilm(sysnew)))
     Mliquid_new = sum(getMliquid(sysnew))
     Mold = sysnew.cache.mass
-    L_adjust = (Mold - Mvapor_new - Mfilm_new - Mliquid_new)./ (ρₗ*Ac)
-    
+    L_adjust = (Mvapor_new + Mfilm_new + Mliquid_new - Mold)./ (ρₗ*Ac)
+
     Lvaporplug = XptoLvaporplug(sysnew.liquid.Xp,sysnew.tube.L,sysnew.tube.closedornot)
     Lpurevapor = Lvaporplug .- Lfilm_start_new .- Lfilm_end_new
     Lliquidslug = XptoLliquidslug(Xpnew,sys.tube.L)
 
 
-    if L_adjust > 0
+    if L_adjust < 0
         maxvalueindex = findmax(Lpurevapor)
         maxvalue = maxvalueindex[1]
         maxindex = maxvalueindex[2]
 
         if maxvalue > 2*L_adjust
-        sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]-L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
+            sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]+L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
+            # println(L_adjust)
+        else println("boiling error!")
         end
     else
         maxvalueindex = findmax(Lliquidslug)
         maxvalue = maxvalueindex[1]
         maxindex = maxvalueindex[2]
+
         if maxvalue > 2*L_adjust
-            sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]-L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
+            sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]+L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
+            # println(L_adjust)
         else println("boiling error!")
         end
     end
@@ -293,8 +297,8 @@ function getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
 
     Linsert = mod(Xvapornew[end] - Xvapornew[1],L)
 
-    insertXp1=mod.((Xp[index][1]-Linsert/2+Lliquid_adjust/2,Xvapornew[1]),L)
-    insertXp2=mod.((Xvapornew[2],Xp[index][2]+Linsert/2-Lliquid_adjust/2),L)
+    insertXp1=mod.((Xp[index][1]+Lliquid_adjust/2,Xvapornew[1]),L)
+    insertXp2=mod.((Xvapornew[2],Xp[index][2]-Lliquid_adjust/2),L)
 
     splice!(Xpnew, index)
     insert!(Xpnew, index,insertXp1)
@@ -303,20 +307,20 @@ function getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
     return Xpnew
 end
 
-# simplified non mass conservation
-function getnewXp(Xp,index,Xvapornew,L)
+# # simplified non mass conservation
+# function getnewXp(Xp,index,Xvapornew,L)
 
-    Xpnew = deepcopy(Xp)
+#     Xpnew = deepcopy(Xp)
 
-    insertXp1=mod.((Xp[index][1],Xvapornew[1]),L)
-    insertXp2=mod.((Xvapornew[2],Xp[index][2]),L)
+#     insertXp1=mod.((Xp[index][1],Xvapornew[1]),L)
+#     insertXp2=mod.((Xvapornew[2],Xp[index][2]),L)
 
-    splice!(Xpnew, index)
-    insert!(Xpnew, index,insertXp1)
-    insert!(Xpnew, index+1,insertXp2)
+#     splice!(Xpnew, index)
+#     insert!(Xpnew, index,insertXp1)
+#     insert!(Xpnew, index+1,insertXp2)
 
-    return Xpnew
-end
+#     return Xpnew
+# end
 
 
 function getnewM(M,index,Minsert,closedornot)
