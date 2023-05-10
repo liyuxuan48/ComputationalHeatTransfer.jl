@@ -41,7 +41,7 @@ end
 function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
     
     step!(integrator_tube,tstep,true);
-
+s
     currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
     currentsys.wall.θarray = temperature_linesource(integrator_plate)
     # integrator_tube.p = deepcopy(currentsys)

@@ -1,4 +1,4 @@
-export constructmapping,sys_interpolation
+export constructmapping,sys_interpolation,slug_interp
 
 function sys_interpolation(sys)
     X_inner = Array{Float64}(undef, 0)
@@ -190,4 +190,47 @@ function XHloop_append(i,H_film_start,H_film_end,sys)
     end
 
 return X_inner_loop_append,H_inner_loop_append
+end
+
+function slug_interp(sys::PHPSystem)
+        filmLend = sys.vapor.Lfilm_end
+    filmLstart = sys.vapor.Lfilm_start
+    Xpstart = [elem[1] for elem in sys.liquid.Xp]
+    Xpend = [elem[2] for elem in sys.liquid.Xp]
+    Xvaporend = Xpstart
+    Xvaporstart = [Xpend[end];Xpend[1:end-1]]
+    Xfilmstart = Xvaporstart .+ filmLstart
+    Xfilmend = Xvaporend .- filmLend
+    Xslugs = zeros(8*size(Xvaporstart)[1])
+    slug_flags = zeros(8*size(Xvaporstart)[1])
+    Xfinalslugs = zeros(8*size(Xvaporstart)[1])
+    slug_flags = zeros(8*size(Xvaporstart)[1])
+
+    for i in eachindex(Xvaporstart)
+        Xslugs[8i-7:8i-6] = [Xvaporstart[i];Xvaporstart[i]]
+        Xslugs[8i-5:8i-4] = [Xfilmstart[i];Xfilmstart[i]]
+        Xslugs[8i-3:8i-2] = [Xfilmend[i];Xfilmend[i]]
+        Xslugs[8i-1:8i] = [Xvaporend[i];Xvaporend[i]]
+
+        slug_flags[8i-7:8i-6] = [1.0; 2.0]
+        slug_flags[8i-5:8i-4] = [2.0; 0.0]
+        slug_flags[8i-3:8i-2] = [0.0; 2.0]
+        slug_flags[8i-1:8i] =   [2.0; 1.0]
+
+        Xslugs = mod.(Xslugs,sys.tube.L)
+    end
+
+    Xmax, imax = findmax(Xslugs)
+    #     Xmin, imin = findmax(Xslugs)
+
+    edge_status = slug_flags[imax+1]
+
+    xtemp = splice!(Xslugs,1:imax+1,0.0)
+    slug_temp = splice!(slug_flags,1:imax+1,edge_status)
+    append!(Xslugs,[xtemp;sys.tube.L])
+    append!(slug_flags,[slug_temp;edge_status])
+
+    Interpolations.deduplicate_knots!(Xslugs,move_knots = true)
+
+    sluginterp = LinearInterpolation(Xslugs, slug_flags);
 end

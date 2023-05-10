@@ -46,39 +46,47 @@ mutable struct OHPTwall end
     ohp
 end
 
-
-@recipe function f(::OHPTemp, i::Int64, SimuResult::SimulationResult)
+@recipe function f(::OHPTemp, i::Int64, SimuResult::SimulationResult; plain=false)
     grid = SimuResult.grid
     plate_T = SimuResult.plate_T_hist[i]
     tube_hist_t = SimuResult.tube_hist_t
 
     time := tube_hist_t[i]
-    
+    minimal := plain
+
     OHPTemp(),plate_T,grid
 end
 
-@recipe function f(::OHPTemp, plate_T::Nodes, grid::PhysicalGrid; time =:none)
-    seriestype --> :heatmap
-    xlabel --> "x [m]"
-    ylabel --> "y [m]"
-    legend --> true
-    
-    xlimit --> grid.xlim[1]
-    ylimit --> grid.xlim[2]
-    
-    colorbar_title --> "\n T[K]"
-    right_margin --> 5Plots.mm
+@recipe function f(::OHPTemp, plate_T::Nodes, grid::PhysicalGrid; time =:none, minimal=false)
 
-    if time != :none
-    # @series begin
-    annotation --> [(0.0, 0.04, string("time = ", round(time, digits=2), "[s]"))]
-    # end
+    seriestype --> :heatmap
+
+    if minimal == false
+        xlabel --> "x [m]"
+        ylabel --> "y [m]"
+        legend --> true
+        
+        xlimit --> grid.xlim[1]
+        ylimit --> grid.xlim[2]
+        
+        colorbar_title --> "\n T[K]"
+        right_margin --> 5Plots.mm
+
+            if time != :none
+            # @series begin
+            annotation --> [(0.0, 0.04, string("time = ", round(time, digits=2), "[s]"))]
+            # end
+            end
+    else
+        showaxis := false;
+        legend := false;
+        colorbar:=false;
     end
     
     plate_T,grid
 end
 
-@recipe function f(::OHPSlug, i::Int64, SimuResult::SimulationResult)
+@recipe function f(::OHPSlug, i::Int64, SimuResult::SimulationResult; plain=false)
     adjust = 1e-2;
     
     tube_sys = getcurrentsys!(SimuResult.tube_hist_u[i],SimuResult.integrator_tube.p)
@@ -86,9 +94,12 @@ end
     
     tube_hist_t = SimuResult.tube_hist_t
     
-    Hₗ = SimuResult.integrator_tube.p.liquid.Hₗ
-    Htmp = sys_to_Harray(tube_sys)
-    Htmp_marker = round.(div.(Htmp,Hₗ-1e-10))
+    sluginterp = slug_interp(tube_sys)
+    xs =  tube_sys.wall.Xarray
+    markers  = map(sluginterp, xs)
+    # Hₗ = SimuResult.integrator_tube.p.liquid.Hₗ
+    # Htmp = sys_to_Harray(tube_sys)
+    # Htmp_marker = round.(div.(Htmp,Hₗ-1e-10))
     
     grid = SimuResult.grid
     ohp = SimuResult.integrator_plate.p.qline[1].body
@@ -99,7 +110,7 @@ end
     fillalpha := 0
     linewidth := 2.0
     clim      :=(0,2)
-    line_z    := Htmp_marker
+    line_z    := markers
     linecolor := palette([:red,  :blue, :yellow])
     bbox_inches := "tight"
     border  := :none
@@ -109,26 +120,31 @@ end
     xlimit --> grid.xlim[1]
     ylimit --> grid.xlim[2]
 
-    annotation := [(-0.052+adjust, -0.028, "dry vapor"),(-0.01+0.007+adjust, -0.028, "vapor with film"),
-    (0.04+0.002+adjust, -0.028, "liquid"),(0.0, 0.028, string("time = ", round(tube_hist_t[i], digits=2), "[s]"))]
+    if plain == false
 
-    @series begin
-        # annotation := (0, 0, "Look up!")
-        seriestype := :scatter
-        color := :red
-        [-0.07+adjust],[-0.028]
-    end
+        annotation := [(-0.052+adjust, -0.028, "dry vapor"),(-0.01+0.007+adjust, -0.028, "vapor with film"),
+        (0.04+0.002+adjust, -0.028, "liquid"),(0.0, 0.028, string("time = ", round(tube_hist_t[i], digits=2), "[s]"))]
 
-    @series begin
-        seriestype := :scatter
-        color := :yellow
-        [-0.03+adjust],[-0.028]
-    end
+        @series begin
+            # annotation := (0, 0, "Look up!")
+            seriestype := :scatter
+            color := :red
+            [-0.07+adjust],[-0.028]
+        end
 
-    @series begin
-        seriestype := :scatter
-        color := :blue
-        [0.03+adjust],[-0.028]
+        @series begin
+            seriestype := :scatter
+            color := :yellow
+            [-0.03+adjust],[-0.028]
+        end
+
+        @series begin
+            seriestype := :scatter
+            color := :blue
+            [0.03+adjust],[-0.028]
+        end
+    else
+        annotation := [(0.0, 0.028, string(round(tube_hist_t[i], digits=2), "[s]"))]
     end
     
     ohp
@@ -333,14 +349,15 @@ end
     
     title := "thermal conductance"
     linewidth := 2
-#     legend := :topleft
+    # legend := :topright
     
     xlabel:="time [s]"
-    ylabel:="C [W/K]"
+    ylabel:="G [W/K]"
     
     xlimit --> (0.0,thist[end])
     ylimit --> (0.0,20.0)
     
+    color := :blue
 #     ribbon := 1
 #     n = length(label_for_plotting)
 #     color := palette(:default)[1:n]'
@@ -350,7 +367,7 @@ end
     @series begin
         # annotation := (0, 0, "Look up!")
         seriestype := :scatter
-#         color := :red
+        color := :darkred
         label := string.("RTD", i1, "-RTD", i2, " exp")
         RTDt,power./(RTD[:,i1] .- RTD[:,i2])
     end

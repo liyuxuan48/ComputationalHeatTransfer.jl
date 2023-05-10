@@ -360,23 +360,11 @@ end
 function suitable_for_boiling(p,i)
     suitable_flag =  true
     L_newbubble = p.wall.L_newbubble
-    # index_max = length(p.liquid.Xp)
-
 
         index = getinsertindex(p.liquid.Xp,p.wall.Xstations[i],p.tube.L,p.tube.closedornot)
-        # Lvaporplug = XptoLvaporplug(p.liquid.Xp,p.tube.L,p.tube.closedornot)
-
-        # L_vapor_left =  Lvaporplug[index]
-        # L_vapor_right = (index == index_max) ? Lvaporplug[1] : Lvaporplug[index + 1]
-
-        # suitable_flag = (1.5*L_newbubble < L_vapor_left) && (1.5*L_newbubble < L_vapor_right) ? true : false
-
 
         L_liquid_left =  mod(p.wall.Xstations[i] - p.liquid.Xp[index][1],p.tube.L)
         L_liquid_right = mod(p.liquid.Xp[index][2] - p.wall.Xstations[i],p.tube.L)
-
-                # println(L_liquid_left)
-                # println(L_liquid_right)
 
         if (10*L_newbubble> L_liquid_left) || (10*L_newbubble > L_liquid_right)
             suitable_flag = false
