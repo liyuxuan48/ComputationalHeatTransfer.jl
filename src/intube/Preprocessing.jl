@@ -102,7 +102,7 @@ end
 #     initialize_ohpsys(fluid_type,sys,p_fluid,Tref,power)
 # end
 
-function initialize_ohpsys(sys,p_fluid,power;boil_waiting_time=0.1,Rn_boil=3e-6,inertia_f=1.3,tube_d=1e-3,tubeshape="square",g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.6,ηminus=0.3,nucleatenum = 1000,L_newbubble = 4tube_d)
+function initialize_ohpsys(sys,p_fluid,power;boil_waiting_time=0.5,Rn_boil=3e-6,inertia_f=1.3,tube_d=1e-3,tubeshape="square",g_angle=(3/2)*π,Nu=3.6,slugnum=30,film_fraction=0.3,g = 0*9.81,ηplus=0.6,ηminus=0.3,nucleatenum = 1000,L_newbubble = 4tube_d)
 
     L = (sys.qline[1].arccoord[1] + sys.qline[1].arccoord[end])  # total length of the pipe when streched to a 1D pipe (an approximate here)
     ohp = sys.qline[1]
