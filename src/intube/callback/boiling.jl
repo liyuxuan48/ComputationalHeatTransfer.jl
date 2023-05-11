@@ -366,7 +366,7 @@ function suitable_for_boiling(p,i)
         L_liquid_left =  mod(p.wall.Xstations[i] - p.liquid.Xp[index][1],p.tube.L)
         L_liquid_right = mod(p.liquid.Xp[index][2] - p.wall.Xstations[i],p.tube.L)
 
-        if (2*L_newbubble> L_liquid_left) || (2*L_newbubble > L_liquid_right)
+        if (3*L_newbubble> L_liquid_left) || (3*L_newbubble > L_liquid_right)
             suitable_flag = false
         end
 
