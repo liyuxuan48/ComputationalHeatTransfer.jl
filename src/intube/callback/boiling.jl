@@ -214,6 +214,12 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
 
     # sysnew.vapor.Lfilm_start = Lfilm_start_new
     # sysnew.vapor.Lfilm_end = Lfilm_end_new
+    # Lvaporplug = XptoLvaporplug(sysnew.liquid.Xp,sysnew.tube.L,sysnew.tube.closedornot)
+    # Lpurevapor = Lvaporplug .- Lfilm_start_new .- Lfilm_end_new
+    # Lliquidslug = XptoLliquidslug(Xpnew,sys.tube.L)
+    # println(Lliquidslug[index])
+    # println(Lliquidslug[index+1])
+    # println(p.liquid.Xp)
 
     θ_interp_walltoliquid, θ_interp_liquidtowall, H_interp_liquidtowall, P_interp_liquidtowall = sys_interpolation(sysnew)
     heightg_interp = sysnew.mapping.heightg_interp
@@ -284,8 +290,8 @@ end
 function getarrayindex(X,Xarray)
 
 for arrayindex = 1:length(Xarray)
-    if X >= Xarray[arrayindex] && X <= Xarray[arrayindex+1]
-        return arrayindex
+    if (X >= Xarray[arrayindex] && X <= Xarray[arrayindex+1]) || (X >= Xarray[arrayindex] && Xarray[arrayindex] >= Xarray[arrayindex+1]) || (X <= Xarray[arrayindex+1] && Xarray[arrayindex] >= Xarray[arrayindex+1])
+        return (arrayindex > 1.1) ? arrayindex : 2
 end
     end
         return NaN
@@ -340,22 +346,22 @@ function getsuperheat(Xstation,sys)
 end
 
 
-```
-    get the index of element of Xarray closest to X.
-    closed loop considered
-```
-function getoneXarrayindex(X,Xarray)
-    for i = 1:length(Xarray)
-        if (Xarray[i] >= Xarray[i+1]) && ((Xarray[i] <= X) || (Xarray[i+1] >= X))
-            return i
-        end
-        if (X >= Xarray[i] && X <= Xarray[i+1])
-            return i
-        end
-    end
+# ```
+#     get the index of element of Xarray closest to X.
+#     closed loop considered
+# ```
+# function getoneXarrayindex(X,Xarray)
+#     for i = 1:length(Xarray)
+#         if (Xarray[i] >= Xarray[i+1]) && ((Xarray[i] <= X) || (Xarray[i+1] >= X))
+#             return i
+#         end
+#         if (X >= Xarray[i] && X <= Xarray[i+1])
+#             return i
+#         end
+#     end
 
-    return length(Xarray)
-end
+#     return length(Xarray)
+# end
 
 function suitable_for_boiling(p,i)
     suitable_flag =  true
@@ -366,7 +372,7 @@ function suitable_for_boiling(p,i)
         L_liquid_left =  mod(p.wall.Xstations[i] - p.liquid.Xp[index][1],p.tube.L)
         L_liquid_right = mod(p.liquid.Xp[index][2] - p.wall.Xstations[i],p.tube.L)
 
-        if (3*L_newbubble> L_liquid_left) || (3*L_newbubble > L_liquid_right)
+        if (5*L_newbubble> L_liquid_left) || (5*L_newbubble > L_liquid_right)
             suitable_flag = false
         end
 
