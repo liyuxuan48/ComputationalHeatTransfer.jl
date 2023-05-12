@@ -176,21 +176,26 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
 
 
     if L_adjust < 0
+        L_newbubble = p.wall.L_newbubble
+
         maxvalueindex = findmax(Lpurevapor)
         maxvalue = maxvalueindex[1]
         maxindex = maxvalueindex[2]
 
-        if maxvalue > 2*L_adjust
+        if maxvalue > L_newbubble
             sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]+L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
             # println(L_adjust)
         else println("boiling error!")
         end
     else
+        L_newbubble = p.wall.L_newbubble
+        L_adjust = (L_adjust > L_newbubble) ? L_newbubble : L_adjust
+
         maxvalueindex = findmax(Lliquidslug)
         maxvalue = maxvalueindex[1]
         maxindex = maxvalueindex[2]
 
-        if maxvalue > 2*L_adjust
+        if maxvalue > L_newbubble
             sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]+L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
             # println(L_adjust)
         else println("boiling error!")
