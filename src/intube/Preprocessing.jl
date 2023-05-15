@@ -69,7 +69,7 @@ end
 function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     P = vapor.P[1]
 
-    @unpack PtoT,PtoD,PtoHfg = tube
+    @unpack TtoP,PtoT,PtoD,PtoHfg = tube
     property = SaturationFluidProperty(fluid_type,PtoT(P));
 
     tube_d = tube.d
@@ -86,12 +86,12 @@ function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     Ja = ΔTthres*Cpₗ*ρₗ/ρv/Hfg
     B = (12*kₗ/pi/ρₗ/Cpₗ)^0.5 * Ja
 
-    t = 1e-3:1e-3:10e0
+    t = 1e-3:1e-3:1e2
     tstar = t .* A^2 ./ B^2 
 
     Rplus = 2/3 .* ((tstar .+ 1).^1.5 .- (tstar).^1.5 .- 1);
     R = Rplus .* B^2 ./ A; 
-    L_equivalent = (4/3) ./ tube_d .* R.^2 
+    L_equivalent = (4/3) .* R
 
     interp_Rtot = LinearInterpolation(L_equivalent, t);
 

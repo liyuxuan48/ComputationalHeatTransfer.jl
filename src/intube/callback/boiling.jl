@@ -35,7 +35,6 @@ function boiling_affect!(integrator)
     boiltime_update_flags = Bool.(zero(p.wall.boiltime_stations))
     for i = 1:length(p.wall.Xstations)
         if ifamong(p.wall.Xstations[i], p.liquid.Xp, p.tube.L) && suitable_for_boiling(p,i) && superheat_flag[i]
-
                 push!(integrator.p.cache.boil_hist,[i,integrator.t]);
                 b_count += 1;
 
@@ -120,30 +119,6 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
     Lfilm_end_new = insert!(Lfilm_end,index+1,Linsert/8)
 
     Lliquid_adjust = 0
-    # max_index = findmax([Lfilm_start_new[index], Lfilm_end_new[index]])[2]
-    # if max_index == 1 && Lfilm_start_new[index] > Linsert/2
-    #     splice!(Lfilm_start_new,index,Lfilm_start_new[index]-Linsert/2)
-    # elseif max_index == 2 && Lfilm_end_new[index] > Linsert/2
-    #     splice!(Lfilm_end_new,index,Lfilm_end_new[index]-Linsert/2)
-    # else
-    #     δarea_deposit = getδarea(Ac,d,δdeposit)
-    #     δfac = δarea_deposit / (Ac - δarea_deposit)
-    #     Lliquid_adjust = -0.5*δfac*sys.wall.L_newbubble
-    #     # println("left films too short")
-    # end
-
-    # max_index = findmax([Lfilm_start_new[loop_plus_index_new[index]], Lfilm_end_new[loop_plus_index_new[index]]])[2]
-    # if max_index == 1 && Lfilm_start_new[loop_plus_index_new[index]] > Linsert/2
-    #     splice!(Lfilm_start_new,loop_plus_index_new[index],Lfilm_start_new[loop_plus_index_new[index]]-Linsert/2)
-    # elseif max_index == 2 && Lfilm_end_new[loop_plus_index_new[index]] > Linsert/2
-    #     splice!(Lfilm_end_new,loop_plus_index_new[index],Lfilm_end_new[loop_plus_index_new[index]]-Linsert/2)
-    # else
-    #     δarea_deposit = getδarea(Ac,d,δdeposit)
-    #     δfac = δarea_deposit / (Ac - δarea_deposit)
-    #     Lliquid_adjust = -0.5*δfac*sys.wall.L_newbubble
-    #     # println("right films too short")
-    # end
-
     Xpnew = getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
 
     # const P in adjacent vapors
@@ -184,7 +159,7 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
 
         if maxvalue > L_newbubble
             sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]+L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
-            # println(L_adjust)
+            # println(L_adjust, "-")
         else println("boiling error!")
         end
     else
@@ -197,14 +172,15 @@ function nucleateboiling(sys,Xvapornew,Pinsert)
 
         if maxvalue > L_newbubble
             sysnew.liquid.Xp[maxindex] = mod.((sysnew.liquid.Xp[maxindex][1]+L_adjust,sysnew.liquid.Xp[maxindex][2]),L)
-            # println(L_adjust)
+            # println(L_adjust," +")
         else println("boiling error!")
         end
     end
 
+    # up to now we got the correct Xpnew, next step is to get Xarraysnew, the splitted Xarrays.
 
-    Xarraysnew = getnewXarrays(index,Xp,sysnew.liquid.Xp,Xarrays,L,closedornot)
-    θarraysnew = getnewθarrays(index,Xp,sysnew.liquid.Xp,Xarrays,θarrays,L,closedornot)
+    Xarraysnew,θarraysnew = getnewXθarrays(index,sysnew.liquid.Xp,Xarrays,θarrays,L)
+    # θarraysnew = getnewθarrays(index,Xp,sysnew.liquid.Xp,Xarrays,θarrays,L,closedornot)
 
     sysnew.liquid.Xarrays = Xarraysnew
     sysnew.liquid.θarrays = θarraysnew
@@ -237,45 +213,73 @@ return sysnew
 end
 
 
- function getnewθarrays(index,Xp,Xpnew,Xarrays,θarrays,L,closedornot)
-    θarraysnew = deepcopy(θarrays)
-    Xarraysnew = deepcopy(Xarrays)
-    arrayindex = getarrayindex(Xpnew[index][2],Xarrays[index])
+#  function getnewθarrays(index,Xp,Xpnew,Xarrays_old,θarrays,L,closedornot)
+#     θarraysnew = deepcopy(θarrays)
+#     Xarraysnew = deepcopy(Xarrays_old)
 
-    θarraysnewleft = θarrays[index][1:arrayindex]
+#     arrayindex = getarrayindex(Xpnew[index][2],Xarrays[index])
 
-    θarraysnewright= θarrays[index][arrayindex+1:end]
-    insert!(θarraysnewright, 1, θarrays[index][arrayindex])
+#     θarraysnewleft = θarrays[index][1:arrayindex]
 
-    splice!(θarraysnew, index)
-    insert!(θarraysnew, index,θarraysnewleft)
-    insert!(θarraysnew, index+1,θarraysnewright)
-end
+#     θarraysnewright= θarrays[index][arrayindex+1:end]
+#     insert!(θarraysnewright, 1, θarrays[index][arrayindex])
+
+#     splice!(θarraysnew, index)
+#     insert!(θarraysnew, index,θarraysnewleft)
+#     insert!(θarraysnew, index+1,θarraysnewright)
+# end
 
 
-function getnewXarrays(index,Xp,Xpnew,Xarrays,L,closedornot)
-    Xarraysnew = deepcopy(Xarrays)
-    arrayindex = getarrayindex(Xpnew[index][2],Xarrays[index])
+# function getnewXarrays(index,Xpnew,Xarrays_old,L)
+#     Nold= length(Xarrays_old[index])
+
+#     Xarraysnew = deepcopy(Xarrays_old)
+#     Xarraysnew[index] = constructoneXarray(Xpnew[index],Nold,L)
+
+#     arrayindex = getarrayindex(Xpnew[index][2],Xarraysnew[index])
+
+#     Xarraysnewleft = constructoneXarray(Xpnew[index],arrayindex,L)
+#     Xarraysnewright = constructoneXarray(Xpnew[index+1],length(Xarrays[index])-arrayindex+1,L)
+
+#     splice!(Xarraysnew, index)
+#     insert!(Xarraysnew, index,Xarraysnewleft)
+#     insert!(Xarraysnew, index+1,Xarraysnewright)
+# end
+
+function getnewXθarrays(index,Xpnew,Xarrays_old,θarrays_old,L)
+    Nold= length(Xarrays_old[index])
+
+    Xarraysnew = deepcopy(Xarrays_old)
+    θarraysnew = deepcopy(θarrays_old)
+
+    # Lliquidslug_old =       mod((Xarrays_old[index][end] - Xarrays_old[index][1]),L)
+    Lliquidslug_new_left =  mod((Xpnew[index][end] - Xpnew[index][1]),L) 
+    Lliquidslug_new_right = mod((Xpnew[index+1][end] - Xpnew[index+1][1]),L) 
+
+    arrayindex = ceil.(Int, Nold * Lliquidslug_new_left / (Lliquidslug_new_left + Lliquidslug_new_right))
+    arrayindex = (arrayindex != 1) ? arrayindex : 2
+    arrayindex = (arrayindex != Nold) ? arrayindex : Nold-1
 
     Xarraysnewleft = constructoneXarray(Xpnew[index],arrayindex,L)
-    Xarraysnewright = constructoneXarray(Xpnew[index+1],length(Xarrays[index])-arrayindex+1,L)
+    Xarraysnewright = constructoneXarray(Xpnew[index+1],Nold-arrayindex+1,L)
+
+    θarraysnewleft = θarrays_old[index][1:arrayindex]
+    θarraysnewright= θarrays_old[index][arrayindex+1:end]
+    insert!(θarraysnewright, 1, θarrays_old[index][arrayindex])
 
     splice!(Xarraysnew, index)
     insert!(Xarraysnew, index,Xarraysnewleft)
     insert!(Xarraysnew, index+1,Xarraysnewright)
+
+    splice!(θarraysnew, index)
+    insert!(θarraysnew, index,θarraysnewleft)
+    insert!(θarraysnew, index+1,θarraysnewright)
+
+    Xarraysnew,θarraysnew
 end
 
 
 function getinsertindex(Xp,Xvapornew_center,L,closedornot)
-
-if !closedornot
-    for index = 1:length(Xp)
-        if Xp[index][1] <= Xvapornew_center && Xp[index][2] >= Xvapornew_center
-            return index
-        end
-    end
-end
-
 if closedornot
     for index = 1:length(Xp)
         if Xp[index][1] <= Xvapornew_center && Xp[index][2] >= Xvapornew_center && Xp[index][2] >= Xp[index][1]
@@ -287,20 +291,29 @@ if closedornot
         end
     end
 end
+
+
+if !closedornot
+    for index = 1:length(Xp)
+        if Xp[index][1] <= Xvapornew_center && Xp[index][2] >= Xvapornew_center
+            return index
+        end
+    end
+end
 # println((Xvapornew[2]+Xvapornew[1])/2)
 # println(Xp)
         return NaN
 end
 
-function getarrayindex(X,Xarray)
+# function getarrayindex(X,Xarray)
 
-for arrayindex = 1:length(Xarray)
-    if (X >= Xarray[arrayindex] && X <= Xarray[arrayindex+1]) || (X >= Xarray[arrayindex] && Xarray[arrayindex] >= Xarray[arrayindex+1]) || (X <= Xarray[arrayindex+1] && Xarray[arrayindex] >= Xarray[arrayindex+1])
-        return (arrayindex > 1.1) ? arrayindex : 2
-end
-    end
-        return NaN
-end
+# for arrayindex = 1:length(Xarray)
+#     if (X >= Xarray[arrayindex] && X <= Xarray[arrayindex+1]) || (X >= Xarray[arrayindex] && Xarray[arrayindex] >= Xarray[arrayindex+1]) || (X <= Xarray[arrayindex+1] && Xarray[arrayindex] >= Xarray[arrayindex+1])
+#         return (arrayindex > 1.1) ? arrayindex : 2
+# end
+#     end
+#         return NaN
+# end
 
 function getnewXp(Xp,index,Xvapornew,Lliquid_adjust,L,closedornot)
 
