@@ -112,7 +112,7 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             C_end = ρₗ .* Ac .* 4 .* (d .- 2δend) ./ (d^2)
 
             L0threshold_film = 0.05*sys.wall.L_newbubble
-            L0threshold_pure_vapor = 0.3*sys.wall.L_newbubble
+            L0threshold_pure_vapor = 0.5*sys.wall.L_newbubble
 
             dLdt_start_normal = -(dMdt_latent_start_positive .* Eratio_plus .+ dMdt_latent_start_negative .* Eratio_minus) ./ F_start .- v_vapor_left_normal
             dLdt_end_normal = -(dMdt_latent_end_positive .* Eratio_plus .+ dMdt_latent_end_negative .* Eratio_minus) ./ F_end .+ v_vapor_right_normal

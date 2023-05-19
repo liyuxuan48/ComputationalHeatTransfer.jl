@@ -3,7 +3,7 @@ export merging_affect!,merging_condition,nucleateboiling,merging
 function merging_affect!(integrator)
 
     p = getcurrentsys(integrator.u,integrator.p);
-    δv = 0.5*p.wall.L_newbubble
+    δv = 0.8*p.wall.L_newbubble
 
     merge_flags = getmerge_flags(δv,p)
     indexmergingsite = sort(findall(x->x == true, merge_flags),rev = true)
