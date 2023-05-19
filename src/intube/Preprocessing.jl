@@ -86,7 +86,7 @@ function L_to_boiltime(L_newbubble,Rn,fluid_type,vapor::Vapor,tube::Tube)
     Ja = ΔTthres*Cpₗ*ρₗ/ρv/Hfg
     B = (12*kₗ/pi/ρₗ/Cpₗ)^0.5 * Ja
 
-    t = 1e-3:1e-3:1e2
+    t = 1e-2:1e-2:1e2
     tstar = t .* A^2 ./ B^2 
 
     Rplus = 2/3 .* ((tstar .+ 1).^1.5 .- (tstar).^1.5 .- 1);
@@ -207,6 +207,7 @@ end
 
 function newstate(sys0::PHPSystem)
     Ac = sys0.tube.Ac
+    d = sys0.tube.d
 
     X0 = sys0.liquid.Xp
     dXdt0 = sys0.liquid.dXdt
@@ -216,12 +217,16 @@ function newstate(sys0::PHPSystem)
     Lfilm_start = sys0.vapor.Lfilm_start
     Lfilm_end = sys0.vapor.Lfilm_end
     P = sys0.vapor.P
-    
-
     Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
 
+    δarea_start = Ac .* (1 .- ((d .- 2*δstart) ./ d) .^ 2);
+    δarea_end = Ac .* (1 .- ((d .- 2*δend) ./ d) .^ 2);
+
+    volume_vapor = Lvaporplug .* Ac - Lfilm_start .* δarea_start - Lfilm_end .* δarea_end
+
     @unpack PtoD = sys0.tube
-    M = PtoD(P) .* Lvaporplug .* Ac
+
+    M = PtoD.(P) .* volume_vapor
 
     u=[XMδLtovec(X0,dXdt0,M,δstart,δend,Lfilm_start,Lfilm_end); liquidθtovec(sys0.liquid.θarrays)];
 end

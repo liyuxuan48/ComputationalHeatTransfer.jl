@@ -10,6 +10,9 @@ function ODE_innertube(u,p,t)
 
     newsys = getcurrentsys!(u,sys_init)
 
+    # println(sys_init.tube.PtoT(sys_init.vapor.P))
+    # println(newsys.tube.PtoT(newsys.vapor.P))
+
     dynamicsdu = dynamicsmodel(u[1:index_dynamics_end-1],newsys)
 
     liquiddu = duliquidθtovec(liquidmodel(newsys))
@@ -39,17 +42,22 @@ end
 
 # weakly coupled alternate time marching
 function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
+
+
+    # println(integrator_tube.p.tube.PtoT(integrator_tube.p.vapor.P))
+    currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
+    currentsys.wall.θarray = temperature_linesource(integrator_plate)
     
     step!(integrator_tube,tstep,true);
 
-    currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
-    currentsys.wall.θarray = temperature_linesource(integrator_plate)
+    # currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
+    # currentsys.wall.θarray = temperature_linesource(integrator_plate)
+    
+    # println(integrator_tube.p.tube.PtoT(currentsys.vapor.P))
     # integrator_tube.p = deepcopy(currentsys)
     qtmp = sys_to_heatflux(currentsys)
     sys_plate = integrator_plate.p
     set_linesource_strength!(sys_plate,qtmp)
-
-    # println(sum(qtmp))
 
     ADI_timemarching!(temperature(integrator_plate),sys_plate,tstep)
     integrator_plate.t += tstep

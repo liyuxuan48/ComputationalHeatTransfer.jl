@@ -243,20 +243,22 @@ function dMdtdynamicsmodel(Xpvapor::Array{Tuple{Float64,Float64},1},sys::PHPSyst
     H_interp = sys.mapping.H_interp_liquidtowall
     θ_wall_interp = sys.mapping.θ_interp_walltoliquid
 
-    dx_wall = sys.wall.Xarray[2]-sys.wall.Xarray[1]
+    dx_wall = sys.tube.L/sys.tube.N
 
     # Lvapor = XptoLvaporplug(sys.liquid.Xp,sys.tube.L,sys.tube.closedornot)
     # Lvapor_pure = max.(Lvapor - Lfilm_start - Lfilm_end,0.0)
 
+    # axialrhs_total = 0
+
     for i = 1:length(Xpvapor)
+
         Nstart = Int64(max(2 , div(Lfilm_start[i],dx_wall)))
+        
         heatflux_start = quad_trap(H_interp,θ_wall_interp,θ[i],Xpvapor[i][1],mod(Xpvapor[i][1]+Lfilm_start[i],L),L,Nstart)
         heatflux_start_positive = quad_trap_positive(H_interp,θ_wall_interp,θ[i],Xpvapor[i][1],mod(Xpvapor[i][1]+Lfilm_start[i],L),L,Nstart)
 
-        # Nvapor_pure = Int64(max(2 , div(Lvapor_pure[i],dx_wall)))
-        # heatflux_pure_vapor = quad_trap(H_interp,θ_wall_interp,θ[i],mod(Xpvapor[i][1]+Lfilm_start[i],L),mod(Xpvapor[i][2]-Lfilm_end[i],L),L,Nvapor_pure)
-
         Nend = Int64(max(2 , div(Lfilm_end[i],dx_wall)))
+
         heatflux_end = quad_trap(H_interp,θ_wall_interp,θ[i],mod(Xpvapor[i][2]-Lfilm_end[i],L),Xpvapor[i][2],L,Nend)
         heatflux_end_positive = quad_trap_positive(H_interp,θ_wall_interp,θ[i],mod(Xpvapor[i][2]-Lfilm_end[i],L),Xpvapor[i][2],L,Nend)
 
@@ -394,20 +396,20 @@ function quad_trap(H_interp,θ_interp,θvapor_one, a,b,L,N)
     h = mod((b-a),L)/N
     int = h * ( H_interp(a)*(θ_interp(a)-θvapor_one) + H_interp(b)*(θ_interp(b)-θvapor_one) ) / 2
     for k=1:N-1
-        xk = mod((b-a),L) * k/N + a
-        int = int + h*H_interp(mod(xk,L))*(θ_interp(mod(xk,L))-θvapor_one)
+        xk = mod(mod((b-a),L) * k/N + a,L)
+        int = int + h*H_interp(xk)*(θ_interp(xk)-θvapor_one)
     end
-    return (b>a) ? int : 0
+    return int
 end
 
 function quad_trap_positive(H_interp,θ_interp,θvapor_one, a,b,L,N) 
     h = mod((b-a),L)/N
     int = maximum([h * ( H_interp(a)*(θ_interp(a)-θvapor_one) + H_interp(b)*(θ_interp(b)-θvapor_one) ) / 2, 0.0])
     for k=1:N-1
-        xk = mod((b-a),L) * k/N + a
-        int = int + maximum([h*H_interp(mod(xk,L))*(θ_interp(mod(xk,L))-θvapor_one),0.0])
+        xk = mod(mod((b-a),L) * k/N + a,L)
+        int = int + maximum([h*H_interp(xk)*(θ_interp(xk)-θvapor_one),0.0])
     end
-    return (b>a) ? int : 0
+    return int
 end
 
 function integrator_to_Harray(inte)
