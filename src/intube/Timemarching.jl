@@ -44,7 +44,6 @@ end
 function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
 
 
-    # println(integrator_tube.p.tube.PtoT(integrator_tube.p.vapor.P))
     currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
     currentsys.wall.θarray = temperature_linesource(integrator_plate)
     
