@@ -19,7 +19,7 @@ You may also need to install some other packages to make the notebook run smooth
 Pkg.add("Plots") # plotting functions
 Pkg.add("Interact") # interactive features
 Pkg.add("XLSX") # reading the experiment file in .xlsx format
-Pkg.add("ProgressMeter") $ # having a progressbar when running the simulation
+Pkg.add("ProgressMeter") # having a progressbar when running the simulation
 ```
 
 After installing the packages, we need to run
