@@ -362,13 +362,13 @@ end
 #     n = length(label_for_plotting)
 #     color := palette(:default)[1:n]'
     
-    label := string.("RTD", i1, "-RTD", i2)
+    label := string.("G model")
     
     @series begin
         # annotation := (0, 0, "Look up!")
         seriestype := :scatter
         color := :darkred
-        label := string.("RTD", i1, "-RTD", i2, " exp")
+        label := string.("G experiment")
         RTDt,power./(RTD[:,i1] .- RTD[:,i2])
     end
     
