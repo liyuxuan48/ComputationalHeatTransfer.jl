@@ -43,24 +43,16 @@ end
 # weakly coupled alternate time marching
 function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
 
-
     currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
     currentsys.wall.θarray = temperature_linesource(integrator_plate)
-    
-    step!(integrator_tube,tstep,true);
 
-    # currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)
-    # currentsys.wall.θarray = temperature_linesource(integrator_plate)
-    
-    # println(integrator_tube.p.tube.PtoT(currentsys.vapor.P))
-    # integrator_tube.p = deepcopy(currentsys)
     qtmp = sys_to_heatflux(currentsys)
     sys_plate = integrator_plate.p
     set_linesource_strength!(sys_plate,qtmp)
-
+    
+    step!(integrator_tube,tstep,true);
     ADI_timemarching!(temperature(integrator_plate),sys_plate,tstep)
     integrator_plate.t += tstep
-    
     integrator_tube,integrator_plate
 end
 

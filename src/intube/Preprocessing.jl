@@ -239,6 +239,8 @@ mutable struct SimulationResult
     plate_T_hist     ::Vector{Any}
     integrator_tube  ::Any
     integrator_plate ::Any
+    integrator_tube_resume  ::Any
+    integrator_plate_resume ::Any    
     grid             ::Any
 end
 
@@ -251,9 +253,12 @@ function SimulationResult(int_tube,int_plate)
     tube_hist_θwall = []
     integrator_tube = deepcopy(int_tube)
     integrator_plate = deepcopy(int_plate)
+    integrator_tube_resume = deepcopy(int_tube)
+    integrator_plate_resume = deepcopy(int_plate)
+
     grid = int_plate.p.grid
     
-    return SimulationResult(tube_hist_t,tube_hist_u,tube_hist_θwall,boil_hist,plate_T_hist,integrator_tube,integrator_plate,grid)
+    return SimulationResult(tube_hist_t,tube_hist_u,tube_hist_θwall,boil_hist,plate_T_hist,integrator_tube,integrator_plate,integrator_tube_resume,integrator_plate_resume,grid)
 end
 
 function store!(sr,integrator_tube,integrator_plate)
@@ -265,4 +270,7 @@ function store!(sr,integrator_tube,integrator_plate)
         push!(sr.tube_hist_θwall,deepcopy(integrator_tube.p.wall.θarray))
         push!(sr.tube_hist_u,deepcopy(integrator_tube.u));
         push!(sr.tube_hist_t,deepcopy(integrator_tube.t));
+        sr.integrator_tube_resume = deepcopy(integrator_tube)
+        sr.integrator_plate_resume = deepcopy(integrator_plate)
+
 end

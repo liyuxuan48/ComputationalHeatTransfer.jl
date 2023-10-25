@@ -5,7 +5,7 @@ XMtovec,XMδtovec,vectoXM,vectoXMδ,XMδLtovec,vectoXMδL, # transfer Xp,dXdt,M,
 XptoLvaporplug,XptoLliquidslug,getXpvapor, # transfer Xp to the length of vapors, length of liquids, and Xp for vapor.
 ifamongone,ifamong,constructXarrays,
 duliquidθtovec,duwallθtovec,liquidθtovec,wallθtovec, # transfer temperature field to state vector for liquid and wall.
-Hfilm,getδarea,getδFromδarea,getMvapor,getMfilm,getMliquid,
+Hfilm,getδarea,getδFromδarea,getMvapor,getMfilm,getMliquid,getVolumevapor,
 getCa,filmδcorr,getAdeposit,f_churchill,Catoδ,RntoΔT
 
 
@@ -724,34 +724,34 @@ function filmδcorr(Ca,d)
     filmδ = d .* 0.67.*Ca.^(2/3)./(1 .+ 3.35.*Ca.^(2/3))
 end
 
-function getAdeposit(sys)
-    dXdt= sys.liquid.dXdt
-    Ac= sys.tube.Ac
-    d = sys.tube.d
-    δ = sys.vapor.δ
-    μₗ = sys.liquid.μₗ
-    σ = sys.liquid.σ
+# function getAdeposit(sys)
+#     dXdt= sys.liquid.dXdt
+#     Ac= sys.tube.Ac
+#     d = sys.tube.d
+#     δ = sys.vapor.δ
+#     μₗ = sys.liquid.μₗ
+#     σ = sys.liquid.σ
 
-    numofliquidslug = length(dXdt)
+#     numofliquidslug = length(dXdt)
 
-    δarea = Ac .* (1 .- ((d .- 2*δ ) ./ d) .^ 2);
+#     δarea = Ac .* (1 .- ((d .- 2*δ ) ./ d) .^ 2);
 
-# need to initialize it later on
-    Adeposit = deepcopy(dXdt)
+# # need to initialize it later on
+#     Adeposit = deepcopy(dXdt)
 
-    Ca = getCa.(μₗ,σ,dXdt)
-    δarea_corr = getδarea.(Ac,d,filmδcorr.(Ca,d))
+#     Ca = getCa.(μₗ,σ,dXdt)
+#     δarea_corr = getδarea.(Ac,d,filmδcorr.(Ca,d))
 
 
-    for i = 1:length(Adeposit)
-        loop_index = (i != numofliquidslug) ? i+1 : 1
-        Adeposit_left = dXdt[i][1] > 0 ? δarea_corr[i][1] : δarea[i]
-        Adeposit_right = dXdt[i][end] < 0 ? δarea_corr[i][end] : δarea[loop_index]
-        Adeposit[i]  =   (Adeposit_left, Adeposit_right)
-    end
+#     for i = 1:length(Adeposit)
+#         loop_index = (i != numofliquidslug) ? i+1 : 1
+#         Adeposit_left = dXdt[i][1] > 0 ? δarea_corr[i][1] : δarea[i]
+#         Adeposit_right = dXdt[i][end] < 0 ? δarea_corr[i][end] : δarea[loop_index]
+#         Adeposit[i]  =   (Adeposit_left, Adeposit_right)
+#     end
 
-    Adeposit
-end
+#     Adeposit
+# end
 
 # function getAdeposit(sys,δdeposit)
 #     dXdt= sys.liquid.dXdt
