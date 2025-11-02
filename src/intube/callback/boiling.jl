@@ -378,44 +378,44 @@ function suitable_for_boiling(p,i)
     return suitable_flag
 end
 
-function get_vapor_energy(sys0::PHPSystem)
-    Ac = sys0.tube.Ac
-    d = sys0.tube.d
+# function get_vapor_energy(sys0::PHPSystem)
+#     Ac = sys0.tube.Ac
+#     d = sys0.tube.d
 
-    X0 = sys0.liquid.Xp
-    dXdt0 = sys0.liquid.dXdt
+#     X0 = sys0.liquid.Xp
+#     dXdt0 = sys0.liquid.dXdt
 
-    δstart = sys0.vapor.δstart
-    δend = sys0.vapor.δend
-    Lfilm_start = sys0.vapor.Lfilm_start
-    Lfilm_end = sys0.vapor.Lfilm_end
-    P = sys0.vapor.P
-    Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
+#     δstart = sys0.vapor.δstart
+#     δend = sys0.vapor.δend
+#     Lfilm_start = sys0.vapor.Lfilm_start
+#     Lfilm_end = sys0.vapor.Lfilm_end
+#     P = sys0.vapor.P
+#     Lvaporplug = XptoLvaporplug(X0,sys0.tube.L,sys0.tube.closedornot)
 
-    δarea_start = Ac .* (1 .- ((d .- 2*δstart) ./ d) .^ 2);
-    δarea_end = Ac .* (1 .- ((d .- 2*δend) ./ d) .^ 2);
+#     δarea_start = Ac .* (1 .- ((d .- 2*δstart) ./ d) .^ 2);
+#     δarea_end = Ac .* (1 .- ((d .- 2*δend) ./ d) .^ 2);
 
-    volume_vapor = Lvaporplug .* Ac - Lfilm_start .* δarea_start - Lfilm_end .* δarea_end
+#     volume_vapor = Lvaporplug .* Ac - Lfilm_start .* δarea_start - Lfilm_end .* δarea_end
 
-    PtoD = sys0.tube.PtoD
-    PtoT = sys0.tube.PtoT
+#     PtoD = sys0.tube.PtoD
+#     PtoT = sys0.tube.PtoT
 
-    M = PtoD.(P) .* volume_vapor
+#     M = PtoD.(P) .* volume_vapor
     
-    U =  PtoT.(P) .* sys0.liquid.Cp .* volume_vapor
-    sum(U)
-end
+#     U =  PtoT.(P) .* sys0.liquid.Cp .* volume_vapor
+#     sum(U)
+# end
 
-function get_liquid_energy(sys0::PHPSystem)
-    Ac = sys0.tube.Ac
-    ρ = sys0.liquid.ρ
-    Cp = sys0.liquid.Cp
-    L = sys0.tube.L
-    sys0.liquid.Xarrays;
-    ds_liquid = [mod(Xarray[end]-Xarray[1],L)/length(Xarray) for Xarray in sys0.liquid.Xarrays];
-    # println(sys0.liquid.Xp)
-    # println(ds_liquid)
-    liquid_energy = sum.(sys0.liquid.θarrays).*ds_liquid .* (Ac .* ρ .* Cp)
-    # println(liquid_energy)
-    sum(liquid_energy)
-end
+# function get_liquid_energy(sys0::PHPSystem)
+#     Ac = sys0.tube.Ac
+#     ρ = sys0.liquid.ρ
+#     Cp = sys0.liquid.Cp
+#     L = sys0.tube.L
+#     sys0.liquid.Xarrays;
+#     ds_liquid = [mod(Xarray[end]-Xarray[1],L)/length(Xarray) for Xarray in sys0.liquid.Xarrays];
+#     # println(sys0.liquid.Xp)
+#     # println(ds_liquid)
+#     liquid_energy = sum.(sys0.liquid.θarrays).*ds_liquid .* (Ac .* ρ .* Cp)
+#     # println(liquid_energy)
+#     sum(liquid_energy)
+# end

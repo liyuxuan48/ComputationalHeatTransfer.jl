@@ -621,11 +621,11 @@ function getδarea(Ac,d,δ)
     δarea
 end
 
-function getδFromδarea(Ac,d,δarea)
-    δ = sqrt(δarea/Ac) * d/2
+# function getδFromδarea(Ac,d,δarea)
+#     δ = (1-sqrt(1-δarea/Ac)) * d/2
 
-    δ
-end
+#     δ
+# end
 
 
 function getMvapor(sys)
@@ -825,18 +825,6 @@ function f_churchill(Re,ϵ=0.001)
     
     f
 end
-
-# function Catoδ(d,Ca;adjust_factor=1,δmin=2e-6,δmax=1e-4)
-
-#     δ = Ca .^ (2/3) ./ (1 .+ Ca .^ (2/3)) .* d ./ 2 .* adjust_factor
-#     if (δ < δmin)
-#         return δmin
-#     elseif (δ > δmax)
-#         return δmax
-#     else 
-#         return δ
-#     end
-# end
 
 function Catoδ(d,Ca;adjust_factor=1,δmin=2e-6,δmax=1e-4)
 
