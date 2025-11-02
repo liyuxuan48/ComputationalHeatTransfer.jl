@@ -178,7 +178,7 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
 
 
             dδdt_matrix_start = hcat(dδdt_start_normal,0 .* dδdt_start_normal,dδdt_start_normal,dδdt_start_case4,0 .* dδdt_start_normal)'
-            dδdt_matrix_end   = hcat(dδdt_end_normal,0 .* dδdt_end_normal,dδdt_end_normal,dδdt_end_case4,0 .* dLdt_end_normal)'
+            dδdt_matrix_end   = hcat(dδdt_end_normal,0 .* dδdt_end_normal,dδdt_end_normal,dδdt_end_case4,0 .* dδdt_end_normal)'
         
             dδdt_start = sum(he_matrix_start .* dδdt_matrix_start,dims=1)
             dδdt_end = sum(he_matrix_end .* dδdt_matrix_end,dims=1)
