@@ -503,3 +503,71 @@ sys_tube = initialize_ohpsys(sys_plate,p_fluid,power)
     @test ComputationalHeatTransfer.getMvapor(sys_tube) ≈ ρv.*vol
 
 end
+
+@testset "Mass functions" begin
+
+    numofslugs = length(sys_tube.liquid.Xp)
+
+    sys_tube.vapor.δstart .= zeros(numofslugs) .+ 1e-5 .+ 1e-5 .* rand(numofslugs) # initial velocity of the slugs
+    sys_tube.vapor.δend .= zeros(numofslugs) .+ 1e-5 .+ 1e-5 .* rand(numofslugs) # initial velocity of the slugs
+    
+
+    d = sys_tube.tube.d
+    δstart = sys_tube.vapor.δstart
+    δend = sys_tube.vapor.δend
+    Lfilm_start = sys_tube.vapor.Lfilm_start
+    Lfilm_end = sys_tube.vapor.Lfilm_end
+    Xp = sys_tube.liquid.Xp
+    dXdt = sys_tube.liquid.dXdt
+    Ac = sys_tube.tube.Ac
+    L = sys_tube.tube.L
+    ρₗ = sys_tube.liquid.ρ
+    closedornot = sys_tube.tube.closedornot
+
+    Lvaporplug = XptoLvaporplug(Xp,L,closedornot)
+    Lliquidslug = XptoLliquidslug(Xp,L)
+    Astart = getδarea(Ac,d,δstart)
+    Aend = getδarea(Ac,d,δend)
+
+    ρv = sys_tube.tube.PtoD.(sys_tube.vapor.P)
+
+    # mass of vapor
+    vol_vapor_analytical = Lvaporplug .* Ac .- Lfilm_start .* Astart .- Lfilm_end .* Aend
+    M_vapor_analytical = ρv .* vol_vapor_analytical
+
+    @test ComputationalHeatTransfer.getMvapor(sys_tube) ≈ M_vapor_analytical
+
+    # mass of liquid
+    vol_liquid_analytical = Lliquidslug .* Ac
+    M_liquid_analytical = ρₗ .* vol_liquid_analytical
+
+    @test ComputationalHeatTransfer.getMliquid(sys_tube) ≈ M_liquid_analytical
+
+    # mass of films
+    vol_film_start_analytical = Lfilm_start .* Astart
+    M_film_start_analytical = ρₗ .* vol_film_start_analytical
+    vol_film_end_analytical = Lfilm_end .* Aend
+    M_film_end_analytical = ρₗ .* vol_film_end_analytical
+
+    Mfilm_start,Mfilm_end = ComputationalHeatTransfer.getMfilm(sys_tube)
+
+    @test Mfilm_start ≈ M_film_start_analytical
+    @test Mfilm_end ≈ M_film_end_analytical
+
+end
+
+# some threshold values need to be changed for other applications
+@testset "Hfilm" begin
+
+    δmin = sys_tube.vapor.δmin;
+    δthreshold = 5e-6
+    δmax = 1e-4
+
+    kₗ = sys_tube.vapor.k
+    Hᵥ = sys_tube.vapor.Hᵥ
+    δs = [1e-6;3e-6;1e-5;1.5e-4;3e-4]
+
+    @test ComputationalHeatTransfer.Hfilm.(δs,[sys_tube]) ≈ [0.0;(δs[2]-δmin)*(kₗ/δthreshold - Hᵥ)/(δthreshold-δmin);kₗ/δs[3];0.5*kₗ/δmax+1e-6;0.0]
+end
+
+
