@@ -5,8 +5,8 @@ XMtovec,XMδtovec,vectoXM,vectoXMδ,XMδLtovec,vectoXMδL, # transfer Xp,dXdt,M,
 XptoLvaporplug,XptoLliquidslug,getXpvapor, # transfer Xp to the length of vapors, length of liquids, and Xp for vapor.
 ifamongone,ifamong,constructXarrays,
 duliquidθtovec,duwallθtovec,liquidθtovec,wallθtovec, # transfer temperature field to state vector for liquid and wall.
-Hfilm,getδarea,getδFromδarea,getMvapor,getMfilm,getMliquid,
-getCa,filmδcorr,getAdeposit,f_churchill,Catoδ,RntoΔT
+Hfilm,getδarea,getMvapor,getMfilm,getMliquid,
+getCa,getAdeposit,f_churchill,Catoδ,RntoΔT
 
 
 # """
@@ -607,7 +607,7 @@ function Hfilm(δfilm,sys)
         return kₗ/δfilm
     elseif (δfilm > δmax) && (δfilm < 2δmax)
         return  kₗ/δmax - (δfilm-δmax)*(kₗ/δmax^2) + 1e-6
-    elseif δfilm > δmin
+    elseif (δfilm > δmin) && (δfilm < δthreshold)
         return  Hᵥ + (δfilm-δmin)*(kₗ/δthreshold - Hᵥ)/(δthreshold-δmin) + 1e-6
     else
         # return Hᵥ  + 1e-6
