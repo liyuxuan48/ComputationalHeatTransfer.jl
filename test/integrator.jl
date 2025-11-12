@@ -153,6 +153,12 @@ sys_plate = HeatConduction(params,Δx,xlim,ylim,Δt_max,qline=ohpgeom,qflux=epar
     @test length(p_new.liquid.Xp) == length(p_old.liquid.Xp) - 1
     @test isapprox(sum(XptoLliquidslug(p_new.liquid.Xp,p_new.tube.L)), sum(XptoLliquidslug(p_old.liquid.Xp,p_old.tube.L)), rtol=2e-3)
     @test p_new.liquid.Xp[2:end] == p_old.liquid.Xp[3:end]
+    @test p_new.liquid.dXdt[2:end] == p_old.liquid.dXdt[3:end]
+
+
+    L_liquidslug_old = XptoLliquidslug(p_old.liquid.Xp,p_old.tube.L)
+    L_liquidslug_new = XptoLliquidslug(p_new.liquid.Xp,p_new.tube.L)
+    @test p_new.liquid.dXdt[1][1] ≈ (p_old.liquid.dXdt[1][1] * L_liquidslug_old[1] + p_old.liquid.dXdt[2][1] * L_liquidslug_old[2])/(L_liquidslug_old[1]+L_liquidslug_old[2]) 
 
     Mvapor_new = sum(getMvapor(p_new))
     Mfilm_new = sum(sum.(getMfilm(p_new)))
@@ -251,6 +257,7 @@ end
     Mfilm_new = sum(sum.(getMfilm(p_new)))
     Mliquid_new = sum(getMliquid(p_new))
     @test isapprox(Mvapor_new+Mfilm_new+Mliquid_new, Mvapor_old+Mfilm_old+Mliquid_old, rtol=1e-4)
+    @test p_old.liquid.dXdt[1][1] == p_new.liquid.dXdt[1][1] == p_new.liquid.dXdt[2][1]
 
     u_plate = newstate(sys_plate) .+ Tref .+ 0.9ΔT# initialize plate T field to uniform Tref
     integrator_plate = init(u_plate,tspan,sys_plate) # construct integrator_plate
