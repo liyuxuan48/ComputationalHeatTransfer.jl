@@ -450,9 +450,9 @@ end
     
     #make sure after time marching, the system state is up-to-date with the latest u
     p_old = deepcopy(integrator_tube.p)
-    OscillatingHeatPipe.exchangepinfo!(integrator_tube,integrator_plate)
+    systemp = ComputationalHeatTransfer.getcurrentsys!(integrator_tube.u,integrator_tube.p)
 
-    @test all(p_old.vapor.P .== integrator_tube.p.vapor.P)
+    @test all(p_old.vapor.P .== systemp.vapor.P)
     @test SimuResult.tube_hist_θwall[end] == integrator_tube.p.wall.θarray
     @test SimuResult.tube_hist_u[end] == integrator_tube.u
     @test SimuResult.tube_hist_t[end] == integrator_tube.t
