@@ -122,12 +122,14 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             he_start_positive = Bool.(heaviside.(dLdt_start_normal))
             he_end_positive = Bool.(heaviside.(dLdt_end_normal))
             he_meet= Bool.(heaviside.(-Lvaporplug .+ Lfilm_start .+ Lfilm_end .+ L0threshold_pure_vapor))
+            he_evap_start_positive = Bool.(heaviside.(-dLdt_start_normal - v_vapor_left_normal))
+            he_evap_end_positive = Bool.(heaviside.(-dLdt_end_normal + v_vapor_right_normal))
 
 
             # zero dLdt case
             case2_flag_start = Bool.((1 .- he_meet) .* he_start_short .* (1 .- he_start_positive))
             # two ends meet and both nonzero case
-            case3_flag_start = Bool.(he_meet .* he_start_short .* he_start_positive .+ he_meet .* (1 .- he_start_short) .* (1 .- he_end_short))
+            case3_flag_start = Bool.(he_meet .* he_start_short .* he_start_positive .+ he_meet .* (1 .- he_start_short) .* (1 .- he_end_short)) .* (1 .- he_evap_start_positive) .* (1 .- he_evap_end_positive)
             # two ends meet and other side zero case
             case4_flag_start = Bool.(he_meet .* (1 .- he_start_short) .* he_end_short .* (1 .- he_end_positive))
             # two ends meet and this side zero case
@@ -138,7 +140,7 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             # zero dLdt case
             case2_flag_end = Bool.((1 .- he_meet) .* he_end_short .* (1 .- he_end_positive))
             # two ends meet and both nonzero case
-            case3_flag_end = Bool.(he_meet .* he_end_short .* he_end_positive .+ he_meet .* (1 .- he_end_short) .* (1 .- he_start_short))
+            case3_flag_end = Bool.(he_meet .* he_end_short .* he_end_positive .+ he_meet .* (1 .- he_end_short) .* (1 .- he_start_short)) .* (1 .- he_evap_start_positive) .* (1 .- he_evap_end_positive)
             # two ends meet and other side zero case
             case4_flag_end = Bool.(he_meet .* (1 .- he_end_short) .* he_start_short .* (1 .- he_start_positive))
             # two ends meet and this side zero case
@@ -176,9 +178,11 @@ function dynamicsmodel(u::Array{Float64,1},p::PHPSystem)
             dδdt_start_case4 = (-dMdt_latent_start .- F_start .* dLdt_start' .- ρₗ .* A_dδdt_left_vapor  .* v_vapor_left_normal .+ ρₗ .* Astart  .* v_vapor_right_case5) ./ (C_start .* Lfilm_start) 
             dδdt_end_case4 = (-dMdt_latent_end     .- F_end   .* dLdt_end'   .+ ρₗ .* A_dδdt_right_vapor .* v_vapor_right_normal .- ρₗ .* Aend  .* v_vapor_left_case5) ./ (C_end .* Lfilm_end)
 
+            dδdt_start_case25 = (-dMdt_latent_start) ./ (C_start .* Lfilm_start)
+            dδdt_end_case25 = (-dMdt_latent_end) ./ (C_end .* Lfilm_end)
 
-            dδdt_matrix_start = hcat(dδdt_start_normal,0 .* dδdt_start_normal,dδdt_start_normal,dδdt_start_case4,0 .* dδdt_start_normal)'
-            dδdt_matrix_end   = hcat(dδdt_end_normal,0 .* dδdt_end_normal,dδdt_end_normal,dδdt_end_case4,0 .* dLdt_end_normal)'
+            dδdt_matrix_start = hcat(dδdt_start_normal,dδdt_start_case25,dδdt_start_normal,dδdt_start_case4,dδdt_start_case25)'
+            dδdt_matrix_end   = hcat(dδdt_end_normal,dδdt_end_case25,dδdt_end_normal,dδdt_end_case4,dδdt_end_case25)'
         
             dδdt_start = sum(he_matrix_start .* dδdt_matrix_start,dims=1)
             dδdt_end = sum(he_matrix_end .* dδdt_matrix_end,dims=1)
