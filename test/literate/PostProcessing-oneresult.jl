@@ -6,7 +6,12 @@ using Plots
 using Interact
 
 #   # Read simulation data
-
+## This ASETS-II workbook uses strict OOXML. XLSX.jl can convert strict files while reading,
+## but this strict custom XML relationship is missing from its built-in mapping.
+import XLSX
+XLSX.STRICT_TO_TRANSITIONAL["http://purl.oclc.org/ooxml/officeDocument/relationships/customXml"] =
+"http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXml"
+    
 read_path = "../numedata/solution.jld2"
 SimuResult = load(read_path)["SimulationResult"];
 
