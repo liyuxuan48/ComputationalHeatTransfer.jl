@@ -40,7 +40,7 @@ function ODE_steadyfilm(u,p,t)
 end
 
 
-# weakly coupled alternate time marching
+# weakly coupled time marching
 function timemarching!(integrator_tube,integrator_plate,tstep::Float64)
 
     currentsys = getcurrentsys!(integrator_tube.u,integrator_tube.p)

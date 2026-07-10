@@ -5,41 +5,10 @@ XMtovec,XMδtovec,vectoXM,vectoXMδ,XMδLtovec,vectoXMδL, # transfer Xp,dXdt,M,
 XptoLvaporplug,XptoLliquidslug,getXpvapor, # transfer Xp to the length of vapors, length of liquids, and Xp for vapor.
 ifamongone,ifamong,constructXarrays,
 duliquidθtovec,duwallθtovec,liquidθtovec,wallθtovec, # transfer temperature field to state vector for liquid and wall.
-Hfilm,getδarea,getδFromδarea,getMvapor,getMfilm,getMliquid,getVolumevapor,
-getCa,filmδcorr,getAdeposit,f_churchill,Catoδ,RntoΔT
+Hfilm,getδarea,getMvapor,getMfilm,getMliquid,
+getCa,getAdeposit,f_churchill,Catoδ,RntoΔT
 
 
-# """
-#     This function is a sub-function of getheight. This function is to get the actural physical heightg for one interface
-#         X     ::   the location of one interface
-#         L2D   ::   the length of one bend to another bend (the length in 2D)
-#         angle ::   the inclination angle
-# """
-
-# function getoneheight(X::Float64,L2D::Float64,angle::Float64)
-
-#     oneheight = Integer(mod(div(X,L2D),2.0)) == 0 ? L2D - mod(X,L2D) : mod(X,L2D)
-
-#     return oneheight*sin(angle)
-# end
-
-# """
-#     This function is to get the actural physical heights for all interfaces
-#         Xp    ::   the locations of all interfaces
-#         L2D   ::   the length of one bend to another bend (the length in 2D)
-#         angle ::   the inclination angle
-# """
-
-# function getheight(Xp::Array{Tuple{Float64,Float64},1},L2D::Float64,angle::Float64)
-
-#     heightg=deepcopy(Xp)
-
-#     for i =1:length(Xp)
-#         heightg[i]=(getoneheight(Xp[i][1],L2D,angle), getoneheight(Xp[i][end],L2D,angle))
-#     end
-
-#     return heightg
-# end
 function getgvec(g0::T,g_angle::T=3/2*π) where {T<:Real}
     g = g0*[cos(g_angle),sin(g_angle)]
 end
@@ -414,43 +383,6 @@ function getXpvapor(Xp,L,closedornot)
     return Xpvapor
 end
 
-# function getdXdtvapor(Xp,L,closedornot)
-#
-#     Xpvapor=deepcopy(Xp)
-#
-#     if closedornot == false
-#         Xpvapor[1]=(0.0,Xp[1][1])
-#
-#         for i = 2:(length(Xp))
-#             Xpvapor[i]=(Xp[i-1][end],Xp[i][1])
-#         end
-#
-#         push!(Xpvapor,(Xp[end][end],L))
-#     end
-#
-#     if closedornot == true
-#         Xpvapor[1]=(Xp[end][end],Xp[1][1])
-#
-#         for i = 2:(length(Xp))
-#             Xpvapor[i]=(Xp[i-1][end],Xp[i][1])
-#         end
-#     end
-#
-#     return dXdt
-# end
-
-#
-# """
-#     This is a general sub-function of ifamong to determine if the value is in the range
-#
-#     value ::  a value
-#     range ::  a tuple
-# """
-#
-# function ifamongone(value::Float64, range::Tuple{Float64,Float64})
-#     return (value >= range[1]) && (value <= range[end]) ? true : false
-# end
-
 """
     This is a function for a closedloop to determine if the value in in the range that crosses the end point
 
@@ -461,18 +393,6 @@ end
 function ifamongone(value::Float64, range::Tuple{Float64,Float64}, L::Float64)
     return ((value >= range[1]) && (value <= range[end])) || ((value <= range[end]) && (range[1] >= range[end])) || ((value >= range[1]) && (range[1] >= range[end])) ? true : false
 end
-
-# """
-#     This is a function to see if the value in in the range
-#
-#     value ::  a value
-#     range ::  an array
-# """
-#
-# function ifamongone(value::Float64, range::Array{Float64,1})
-#     return (value >= range[1]) && (value <= range[end]) ? true : false
-# end
-#
 
 """
     This is a general function to determine if the value is in any of an array of range
@@ -603,11 +523,11 @@ function Hfilm(δfilm,sys)
     kₗ   = sys.vapor.k
     Hᵥ  = sys.vapor.Hᵥ
 
-    if (δfilm > δthreshold) && (δfilm < δmax)
+    if (δfilm > δthreshold) && (δfilm <= δmax)
         return kₗ/δfilm
-    elseif (δfilm > δmax) && (δfilm < 2δmax)
+    elseif (δfilm > δmax) && (δfilm <= 2δmax)
         return  kₗ/δmax - (δfilm-δmax)*(kₗ/δmax^2) + 1e-6
-    elseif δfilm > δmin
+    elseif (δfilm > δmin) && (δfilm <= δthreshold)
         return  Hᵥ + (δfilm-δmin)*(kₗ/δthreshold - Hᵥ)/(δthreshold-δmin) + 1e-6
     else
         # return Hᵥ  + 1e-6
@@ -621,11 +541,11 @@ function getδarea(Ac,d,δ)
     δarea
 end
 
-function getδFromδarea(Ac,d,δarea)
-    δ = sqrt(δarea/Ac) * d/2
+# function getδFromδarea(Ac,d,δarea)
+#     δ = (1-sqrt(1-δarea/Ac)) * d/2
 
-    δ
-end
+#     δ
+# end
 
 
 function getMvapor(sys)
@@ -720,67 +640,6 @@ function getCa(μ,σ,velocity)
     Ca = abs.(μ.*velocity./σ)
 end
 
-function filmδcorr(Ca,d)
-    filmδ = d .* 0.67.*Ca.^(2/3)./(1 .+ 3.35.*Ca.^(2/3))
-end
-
-# function getAdeposit(sys)
-#     dXdt= sys.liquid.dXdt
-#     Ac= sys.tube.Ac
-#     d = sys.tube.d
-#     δ = sys.vapor.δ
-#     μₗ = sys.liquid.μₗ
-#     σ = sys.liquid.σ
-
-#     numofliquidslug = length(dXdt)
-
-#     δarea = Ac .* (1 .- ((d .- 2*δ ) ./ d) .^ 2);
-
-# # need to initialize it later on
-#     Adeposit = deepcopy(dXdt)
-
-#     Ca = getCa.(μₗ,σ,dXdt)
-#     δarea_corr = getδarea.(Ac,d,filmδcorr.(Ca,d))
-
-
-#     for i = 1:length(Adeposit)
-#         loop_index = (i != numofliquidslug) ? i+1 : 1
-#         Adeposit_left = dXdt[i][1] > 0 ? δarea_corr[i][1] : δarea[i]
-#         Adeposit_right = dXdt[i][end] < 0 ? δarea_corr[i][end] : δarea[loop_index]
-#         Adeposit[i]  =   (Adeposit_left, Adeposit_right)
-#     end
-
-#     Adeposit
-# end
-
-# function getAdeposit(sys,δdeposit)
-#     dXdt= sys.liquid.dXdt
-#     Ac= sys.tube.Ac
-#     d = sys.tube.d
-#     δ = sys.vapor.δ
-#     μₗ = sys.liquid.μₗ
-#     σ = sys.liquid.σ
-
-#     numofliquidslug = length(dXdt)
-
-#     δdepositArea = getδarea(Ac,d,δdeposit)
-
-#     δarea = Ac .* (1 .- ((d .- 2*δ ) ./ d) .^ 2);
-
-# # need to initialize it later on
-#     Adeposit = deepcopy(dXdt)
-
-
-#     for i = 1:length(Adeposit)
-#         loop_index = (i != numofliquidslug) ? i+1 : 1
-#         Adeposit_left = dXdt[i][1] > 0 ? δdepositArea : δarea[i]
-#         Adeposit_right = dXdt[i][end] < 0 ? δdepositArea : δarea[loop_index]
-#         Adeposit[i]  =   (Adeposit_left, Adeposit_right)
-#     end
-
-#     Adeposit
-# end
-
 function getAdeposit(sys,δdeposit)
     dXdt= sys.liquid.dXdt
     Ac= sys.tube.Ac
@@ -828,7 +687,7 @@ end
 
 function Catoδ(d,Ca;adjust_factor=1,δmin=2e-6,δmax=1e-4)
 
-    δ = Ca .^ (2/3) ./ (1 .+ Ca .^ (2/3)) .* d ./ 2 .* adjust_factor
+    δ = 1.34*Ca .^ (2/3) ./ (1 .+ 3.35* Ca .^ (2/3)) .* d ./ 2 .* adjust_factor
     if (δ < δmin)
         return δmin
     elseif (δ > δmax)

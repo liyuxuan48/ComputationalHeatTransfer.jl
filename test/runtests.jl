@@ -1,5 +1,7 @@
 ##using TestSetExtensions
+using ComputationalHeatTransfer
 using Literate
+using Test
 
 const GROUP = get(ENV, "GROUP", "All")
 
@@ -8,7 +10,11 @@ docdir = "../docs/src/manual"
 litdir = "./literate"
 
 if GROUP == "All" || GROUP == "Auxiliary"
-  #include("pointforce.jl")
+  include("integrator.jl")
+  include("thermomodel.jl")
+  include("correlations.jl")
+  include("datastructures.jl")
+  # include("heatconductions.jl")
 end
 
 
